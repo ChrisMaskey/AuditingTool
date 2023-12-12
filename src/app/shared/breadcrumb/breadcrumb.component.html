@@ -1,0 +1,12 @@
+<div class="flex items-center">
+  <a
+    href="#"
+    class="text-sm leading-[1.375rem] text-[#716F6F]"
+    [ngClass]="{ 'text-black': !path }"
+    >Home</a
+  >
+  <span class="px-2 text-[#716F6F]">/</span>
+  <a class="text-sm leading-[1.375] text-[#1F1E1E]" routerLink="/{{ path }}">{{
+    path
+  }}</a>
+</div>
