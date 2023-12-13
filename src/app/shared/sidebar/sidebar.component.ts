@@ -3,7 +3,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { CommonModule } from '@angular/common';
 import { PageHeaderComponent } from '../page-header/page-header.component';
-import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-sidebar',
