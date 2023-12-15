@@ -1,0 +1,104 @@
+<!-- Container -->
+<div
+  class="flex flex-col items-center justify-center w-full h-full p-5 bg-white rounded-[0.625rem]"
+>
+  <!-- Upload Json Container -->
+  <div class="flex flex-col items-center gap-5">
+    <!-- Header and Upload -->
+    <div class="flex flex-col items-center justify-center gap-[1.875rem]">
+      <!-- Header -->
+      <div class="flex flex-col items-center justify-center gap-[0.625rem]">
+        <h3 class="text-xl leading-[1.875]">Please upload your json file</h3>
+        <h6 class="text-sm leading-[1.3125rem]">
+          Select relevant documents to upload your file
+        </h6>
+      </div>
+    </div>
+
+    <!-- Upload -->
+    <!-- @TODO Add Drag and Drop feature to the following div -->
+    <div
+      class="flex items-center justify-center w-full px-8 py-4 gap-6 border border-dashed border-[#00000040] rounded-[0.625rem]"
+    >
+      <!-- SVG -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="48"
+        height="48"
+        viewBox="0 0 48 48"
+        fill="none"
+      >
+        <path
+          d="M32 32L24 24L16 32"
+          stroke="black"
+          stroke-opacity="0.4"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M24 24V42"
+          stroke="#ABC9FB"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M40.7799 36.78C42.7306 35.7165 44.2716 34.0337 45.1597 31.9972C46.0477 29.9607 46.2323 27.6864 45.6843 25.5334C45.1363 23.3803 43.8869 21.471 42.1333 20.1069C40.3796 18.7427 38.2216 18.0014 35.9999 18H33.4799C32.8745 15.6585 31.7462 13.4846 30.1798 11.642C28.6134 9.79927 26.6496 8.33567 24.4361 7.36118C22.2226 6.3867 19.817 5.92669 17.4002 6.01573C14.9833 6.10478 12.6181 6.74057 10.4823 7.8753C8.34649 9.01003 6.49574 10.6142 5.06916 12.5671C3.64259 14.5201 2.6773 16.771 2.24588 19.1508C1.81446 21.5305 1.92813 23.977 2.57835 26.3065C3.22856 28.636 4.3984 30.7877 5.99992 32.6"
+          stroke="#326FD1"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M32 32L24 24L16 32"
+          stroke="#3B82F6"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+
+      <div class="flex items-center gap-[8.5rem]">
+        <h3 class="text-[0.8125rem]">Select a file or drag and drop here</h3>
+        <!-- @TODO Change the button to PRIMENG Button -->
+        <button
+          class="flex items-center py-3 px-4 bg-[#3B82F6] border border-[#3B82F6] rounded-[0.3125rem]"
+        >
+          <span class="text-[0.625rem] text-white">SELECT FILE</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Dropdown/Form -->
+    <form
+      [formGroup]="uploadJsonForm"
+      class="flex flex-col gap-4 p-6 w-full bg-[#F6F7F9] rounded-[0.625rem]"
+    >
+      <p-dropdown
+        formControlName="client"
+        [options]=""
+        optionLabel="name"
+        placeholder="Client Name*"
+      ></p-dropdown>
+      <p-dropdown
+        formControlName="bank"
+        [options]=""
+        optionLabel="name"
+        placeholder="Bank Name*"
+      ></p-dropdown>
+      <p-dropdown
+        formControlName="accountNumber"
+        [options]=""
+        optionLabel="name"
+        placeholder="Account Number*"
+      ></p-dropdown>
+    </form>
+
+    <button
+      class="flex items-center justify-center py-[0.65625rem] px-[1.1rem] bg-[#3B82F6] border border-[#3B82F6] rounded-[0.3125rem] w-full"
+    >
+      <span class="text-sm text-white">Save</span>
+    </button>
+  </div>
+</div>

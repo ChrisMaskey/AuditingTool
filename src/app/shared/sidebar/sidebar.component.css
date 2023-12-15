@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.sidebar {
+  @apply sticky top-12 left-0  w-56 bg-white text-black drop-shadow-xl overflow-y-hidden;
+  animation: sidebar-expand 0.4s ease;
+}
+
+.sidebar-items {
+  @apply flex items-center justify-center gap-2 py-[0.625rem] hover:bg-[#E6F7FF] w-full cursor-pointer duration-200;
+}
+
+.active {
+  @apply bg-[#E6F7FF] px-4 py-[0.5625rem]  w-full border-r-[3px] border-[#1890FF] text-[#1890FF] duration-200;
+}
+
+.active-sm {
+  @apply bg-[#E6F7FF] px-4 py-[0.5625rem]  w-full;
+}
+
+.active-sm div {
+  @apply bg-[#3B82F6];
+}
+.hidden {
+  display: none;
+}
+
+.btn-shadow {
+  box-shadow: 0px 1px 0px 0px #f0f0f0 inset;
+}
+
+.sm-sidebar {
+  @apply w-12 border-r-0;
+  animation: sidebar-shrink 0.4s ease;
+}
+
+.sidebar-toggle-bottom {
+  @apply absolute bottom-0 w-56 px-4 btn-shadow h-10 py-3 pr-40;
+}
+
+.sm-sidebar-toggle-bottom {
+  @apply flex items-center justify-center w-12 btn-shadow h-10  px-0 btn-shadow py-0 pr-0;
+}
+
+.sm-sidebar-items {
+  @apply flex flex-col items-center justify-center;
+}
+
+.sidebar-toggle-right {
+  @apply absolute top-[28rem]  left-56 w-[0.875rem] h-[4.125rem] cursor-pointer text-black;
+  animation: sidebar-expand-icon 0.4s ease;
+}
+
+.sm-sidebar-toggle-right {
+  @apply left-12;
+  animation: sidebar-shrink-icon 0.4s ease;
+}
+
+@keyframes sidebar-shrink {
+  0% {
+    width: 14rem;
+  }
+  100% {
+    width: 3rem;
+  }
+}
+
+@keyframes sidebar-expand {
+  0% {
+    width: 3rem;
+  }
+  100% {
+    width: 14rem;
+  }
+}
+
+@keyframes sidebar-shrink-icon {
+  0% {
+    left: 14rem;
+  }
+  100% {
+    left: 3rem;
+  }
+}
+@keyframes sidebar-expand-icon {
+  0% {
+    left: 3rem;
+  }
+  100% {
+    left: 14rem;
+  }
+}
