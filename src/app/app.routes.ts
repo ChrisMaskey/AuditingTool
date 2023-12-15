@@ -1,8 +1,19 @@
 import { Routes } from '@angular/router';
 import { AuditTransactionComponent } from './features/feature-audit-transaction/feature-audit-transaction.component';
-import { UploadJsonComponent } from './features/feature-upload-json/feature-upload-json.component';
 
 export const routes: Routes = [
-  { path: 'Transaction', component: AuditTransactionComponent },
-  { path: 'Upload-Json', component: UploadJsonComponent },
+  {
+    path: 'Transaction',
+    loadComponent: () =>
+      import(
+        './features/feature-audit-transaction/feature-audit-transaction.component'
+      ).then((m) => m.AuditTransactionComponent),
+  },
+  {
+    path: 'Upload-Json',
+    loadComponent: () =>
+      import(
+        './features/feature-upload-json/feature-upload-json.component'
+      ).then((m) => m.UploadJsonComponent),
+  },
 ];

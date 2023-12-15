@@ -1,28 +1,26 @@
 import { Injectable, inject } from '@angular/core';
-import { AuditTransactionFacade } from './audit-transaction.facade';
+import { UploadJsonFacade } from './upload-json.facade';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Injectable()
-export class AuditTransactionService implements AuditTransactionFacade {
+export class UploadJsonService implements UploadJsonFacade {
   private formBuilder = inject(FormBuilder);
   private requiredValidator = Validators.required;
 
-  public transactionFilterForm!: FormGroup;
-
+  public uploadJsonForm!: FormGroup;
   constructor() {
-    this.initTransactionFilterForm();
+    this.initUploadJsonForm();
   }
 
-  private initTransactionFilterForm(): void {
-    this.transactionFilterForm = this.formBuilder.group({
+  private initUploadJsonForm(): void {
+    this.uploadJsonForm = this.formBuilder.group({
       client: ['', this.requiredValidator],
       bank: ['', this.requiredValidator],
       accountNumber: ['', this.requiredValidator],
-      date: ['', this.requiredValidator],
     });
   }
 
   public resetForm(): void {
-    this.transactionFilterForm.reset();
+    this.uploadJsonForm.reset();
   }
 }

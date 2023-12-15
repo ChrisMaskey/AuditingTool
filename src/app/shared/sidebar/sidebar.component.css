@@ -3,18 +3,25 @@
 @tailwind utilities;
 
 .sidebar {
-  @apply sticky top-12 left-0 h-screen w-56 bg-white text-black drop-shadow-xl overflow-y-hidden;
+  @apply sticky top-12 left-0  w-56 bg-white text-black drop-shadow-xl overflow-y-hidden;
   animation: sidebar-expand 0.4s ease;
 }
 
 .sidebar-items {
-  @apply px-4 py-[0.5625rem] hover:bg-[#E6F7FF] w-full cursor-pointer duration-200;
+  @apply flex items-center justify-center gap-2 py-[0.625rem] hover:bg-[#E6F7FF] w-full cursor-pointer duration-200;
 }
 
 .active {
-  @apply bg-[#E6F7FF] px-4 py-[0.5625rem]  w-full border-r-4 border-[#1890FF] text-[#1890FF] duration-200;
+  @apply bg-[#E6F7FF] px-4 py-[0.5625rem]  w-full border-r-[3px] border-[#1890FF] text-[#1890FF] duration-200;
 }
 
+.active-sm {
+  @apply bg-[#E6F7FF] px-4 py-[0.5625rem]  w-full;
+}
+
+.active-sm div {
+  @apply bg-[#3B82F6];
+}
 .hidden {
   display: none;
 }
@@ -24,7 +31,7 @@
 }
 
 .sm-sidebar {
-  @apply w-12;
+  @apply w-12 border-r-0;
   animation: sidebar-shrink 0.4s ease;
 }
 
