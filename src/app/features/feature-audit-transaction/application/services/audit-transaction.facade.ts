@@ -4,7 +4,7 @@ export abstract class AuditTransactionFacade {
   abstract transactionFilterForm: FormGroup;
 
   /**
-   * Resets the Transaction Filer Form
+   * Resets the Transaction Filter Form
    */
   abstract resetForm(): void;
 }

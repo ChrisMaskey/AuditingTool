@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AuditTransactionComponent } from './features/feature-audit-transaction/feature-audit-transaction.component';
 
 export const routes: Routes = [
   {

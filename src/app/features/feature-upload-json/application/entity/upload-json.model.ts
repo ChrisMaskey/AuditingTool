@@ -1,6 +1,6 @@
-export interface transactionFilter {
+export interface uploadJson {
+  json: File;
   client: string;
   bank: string;
   accountNumber: string;
-  date: Date;
 }
