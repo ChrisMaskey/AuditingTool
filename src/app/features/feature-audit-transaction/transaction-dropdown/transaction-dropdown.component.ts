@@ -30,7 +30,6 @@ export class TransactionDropdownComponent implements OnInit {
     AuditTransactionFacade
   );
   private el = inject(ElementRef);
-
   protected transactionFilterForm!: FormGroup;
 
   isOpen: boolean = false;
