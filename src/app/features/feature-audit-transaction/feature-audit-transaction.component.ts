@@ -4,6 +4,7 @@ import { TransactionDropdownComponent } from './transaction-dropdown/transaction
 import { AuditTransactionFacade } from './application/services/audit-transaction.facade';
 import { AuditTransactionService } from './application/services/audit-transaction.service';
 import { ButtonModule } from 'primeng/button';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-audit-transaction',

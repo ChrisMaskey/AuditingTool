@@ -10,7 +10,6 @@ import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuditTransactionFacade } from '../application/services/audit-transaction.facade';
 import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
-
 @Component({
   selector: 'app-transaction-dropdown',
   standalone: true,
@@ -23,12 +22,13 @@ import { CalendarModule } from 'primeng/calendar';
   ],
   templateUrl: './transaction-dropdown.component.html',
   styleUrl: './transaction-dropdown.component.css',
-  providers: [],
 })
 export class TransactionDropdownComponent implements OnInit {
   private auditTransactionService: AuditTransactionFacade = inject(
     AuditTransactionFacade
   );
+  protected clients$ = this.auditTransactionService.clients$;
+
   private el = inject(ElementRef);
   protected transactionFilterForm!: FormGroup;
 
@@ -40,14 +40,8 @@ export class TransactionDropdownComponent implements OnInit {
     this.transactionFilterForm =
       this.auditTransactionService.transactionFilterForm;
   }
-  ngOnInit(): void {
-    this.cities = [
-      { name: 'New York', code: 'NY' },
-      { name: 'Rome', code: 'RM' },
-      { name: 'London', code: 'LDN' },
-      { name: 'Istanbul', code: 'IST' },
-      { name: 'Paris', code: 'PRS' },
-    ];
+  async ngOnInit(): Promise<void> {
+    this.auditTransactionService.getClients();
   }
 
   resetForm() {
