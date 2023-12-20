@@ -11,12 +11,19 @@ import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { log } from 'console';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-upload-json',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, DropdownModule, CommonModule],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    DropdownModule,
+    CommonModule,
+    ToastModule,
+  ],
   templateUrl: './feature-upload-json.component.html',
   styleUrl: './feature-upload-json.component.css',
   providers: [
@@ -24,6 +31,7 @@ import { log } from 'console';
       useClass: UploadJsonService,
       provide: UploadJsonFacade,
     },
+    MessageService,
   ],
 })
 export class UploadJsonComponent implements OnInit, OnDestroy {
@@ -44,7 +52,7 @@ export class UploadJsonComponent implements OnInit, OnDestroy {
   private bankSubscription: Subscription | undefined = new Subscription();
   private accountSubscription: Subscription | undefined = new Subscription();
 
-  constructor() {}
+  constructor(private messageService: MessageService) {}
 
   async ngOnInit(): Promise<void> {
     //Initialize the form
@@ -98,7 +106,7 @@ export class UploadJsonComponent implements OnInit, OnDestroy {
         // Do something with the selected JSON file
         console.log('Selected File:', this.selectedFile);
       } else {
-        this.fileExtension = 'File Type Not Supported';
+        this.showError();
       }
     }
   }
@@ -123,6 +131,14 @@ export class UploadJsonComponent implements OnInit, OnDestroy {
       const fileUrl = URL.createObjectURL(this.selectedFile);
       window.open(fileUrl, '_blank');
     }
+  }
+
+  showError() {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Unsupported file format. Please upload a file in JSON format.',
+    });
   }
 
   // @TODO MAKE A DIRECTIVE FOLDER
@@ -150,7 +166,7 @@ export class UploadJsonComponent implements OnInit, OnDestroy {
         console.log('Selected File:', this.selectedFile);
       } else {
         // Handle the case when the file is not a JSON file
-        console.log('Selected file is not a JSON file.');
+        this.showError();
       }
     }
   }
