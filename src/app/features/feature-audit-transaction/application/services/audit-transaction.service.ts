@@ -6,12 +6,11 @@ import {
   GET_BANKS,
   GET_CLIENTS,
 } from '../../../../interfaces/Urls';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, tap } from 'rxjs';
 import { Client } from '../entity/client.model';
 import { ApiResponse } from '../../../../interfaces/api-response-interface';
 import { HttpClient } from '@angular/common/http';
 import { Bank } from '../entity/bank.model';
-import { response } from 'express';
 import { AccountNumber } from '../entity/account-number.model';
 
 @Injectable()
@@ -48,7 +47,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
     this.transactionFilterForm.reset();
   }
 
-  getClients(): Promise<void> {
+  async getClients(): Promise<void> {
     return new Promise((resolve, reject) => {
       return this.http
         .get<ApiResponse>(GET_CLIENTS)
@@ -66,7 +65,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
-  getBanks(clientId: number): Promise<void> {
+  async getBanks(clientId: number): Promise<void> {
     return new Promise((resolve, reject) => {
       return this.http
         .get<ApiResponse>(GET_BANKS(clientId))
@@ -84,7 +83,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
-  getAccounts(clientId: number, bankName: string): Promise<void> {
+  async getAccounts(clientId: number, bankName: string): Promise<void> {
     return new Promise((resolve, reject) => {
       return this.http
         .get<ApiResponse>(GET_ACCOUNT_NUMBERS(clientId, bankName))

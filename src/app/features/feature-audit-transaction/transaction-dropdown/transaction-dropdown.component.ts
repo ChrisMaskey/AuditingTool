@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  OnDestroy,
   OnInit,
   inject,
 } from '@angular/core';
@@ -10,6 +11,7 @@ import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuditTransactionFacade } from '../application/services/audit-transaction.facade';
 import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
+import { Subscription } from 'rxjs/internal/Subscription';
 @Component({
   selector: 'app-transaction-dropdown',
   standalone: true,
@@ -23,11 +25,13 @@ import { CalendarModule } from 'primeng/calendar';
   templateUrl: './transaction-dropdown.component.html',
   styleUrl: './transaction-dropdown.component.css',
 })
-export class TransactionDropdownComponent implements OnInit {
+export class TransactionDropdownComponent implements OnInit, OnDestroy {
   private auditTransactionService: AuditTransactionFacade = inject(
     AuditTransactionFacade
   );
   protected clients$ = this.auditTransactionService.clients$;
+  protected banks$ = this.auditTransactionService.banks$;
+  protected accounts$ = this.auditTransactionService.accounts$;
 
   private el = inject(ElementRef);
   protected transactionFilterForm!: FormGroup;
@@ -36,12 +40,44 @@ export class TransactionDropdownComponent implements OnInit {
   date: Date | undefined;
   cities: any[] | undefined;
 
-  constructor() {
+  private bankSubscription: Subscription | undefined = new Subscription();
+  private accountSubscription: Subscription | undefined = new Subscription();
+
+  constructor() {}
+
+  async ngOnInit(): Promise<void> {
+    // Initialize the form
     this.transactionFilterForm =
       this.auditTransactionService.transactionFilterForm;
-  }
-  async ngOnInit(): Promise<void> {
+
+    // Get Clients
     this.auditTransactionService.getClients();
+
+    // Get Banks
+    this.bankSubscription = this.transactionFilterForm
+      .get('client')
+      ?.valueChanges.subscribe((selectedClient) => {
+        if (selectedClient) {
+          this.auditTransactionService.getBanks(selectedClient.id);
+        }
+      });
+
+    // Get Accounts
+    this.accountSubscription = this.transactionFilterForm
+      .get('bank')
+      ?.valueChanges.subscribe((selectedClient) => {
+        if (selectedClient) {
+          this.auditTransactionService.getAccounts(
+            selectedClient.clientId,
+            selectedClient.bankName
+          );
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.bankSubscription?.unsubscribe();
+    this.accountSubscription?.unsubscribe();
   }
 
   resetForm() {

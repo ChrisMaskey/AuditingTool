@@ -64,53 +64,44 @@
         [formGroup]="transactionFilterForm"
         class="flex flex-col gap-4 w-full"
       >
-        <select
-          class="flex items-center justify-between text-[0.75rem] text-[#6C757D] p-[0.66rem] rounded-md border border-[#CED4DA] appearance-none"
+        <p-dropdown
+          *ngIf="clients$ | async as client"
+          formControlName="client"
+          [options]="client"
+          optionLabel="legalName"
+          placeholder="Client Name*"
+          [required]="true"
         >
-          <option [disabled]>Client Name*</option>
-          <option
-            *ngFor="let client of clients$ | async"
-            class="text-[0.75rem]"
-          >
-            {{ client.legalName }}
-
-            <!-- Dropdown logo -->
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 15 15"
-              fill="none"
-            >
-              <path
-                d="M7.51744 10.898C7.41269 10.8985 7.3089 10.8781 7.21215 10.8379C7.11541 10.7978 7.02766 10.7387 6.95405 10.6642L1.63907 5.34919C1.53306 5.1941 1.48522 5.00656 1.50399 4.81964C1.52276 4.63273 1.60693 4.45844 1.74166 4.32753C1.87639 4.19661 2.05301 4.11748 2.24039 4.10408C2.42777 4.09068 2.61386 4.14389 2.76584 4.2543L7.51744 8.97401L12.269 4.2543C12.4189 4.15715 12.597 4.11312 12.7748 4.12927C12.9527 4.14541 13.1199 4.22079 13.2498 4.34334C13.3797 4.46588 13.4647 4.62848 13.4912 4.80508C13.5177 4.98168 13.4841 5.16206 13.3958 5.3173L8.08083 10.6323C8.00996 10.7126 7.92344 10.7776 7.82656 10.8233C7.72968 10.869 7.62449 10.8944 7.51744 10.898Z"
-                fill="#6C757D"
-              />
-            </svg>
-          </option>
-        </select>
+        </p-dropdown>
         <p-dropdown
+          *ngIf="banks$ | async as bank"
           formControlName="bank"
-          [options]=""
-          optionLabel="name"
+          [options]="bank"
+          optionLabel="bankName"
           placeholder="Bank Name*"
+          [required]="true"
         ></p-dropdown>
         <p-dropdown
+          *ngIf="accounts$ | async as account"
           formControlName="accountNumber"
-          [options]=""
-          optionLabel="name"
+          [options]="account"
+          optionLabel="accountNumber"
           placeholder="Account Number*"
+          [required]="true"
         ></p-dropdown>
-        <!-- <p-calendar
-          [(ngModel)]="date"
-          [iconDisplay]="'input'"
-          [showIcon]="true"
-          inputId="icondisplay"
+        <p-calendar
+          formControlName="date"
+          view="month"
+          dateFormat="mm/yy"
           placeholder="Month-Year"
-        ></p-calendar> -->
+          [readonlyInput]="true"
+          [showIcon]="true"
+        ></p-calendar>
       </form>
 
-      <button class="p-[0.625rem] rounded-[0.25rem] bg-[#3B82F6] w-full">
+      <button
+        class="p-[0.625rem] rounded-[0.25rem] bg-[#3B82F6] w-full hover:bg-[#2563EB] active:bg-[#1D4ED8] duration-200"
+      >
         <span class="text-[0.75rem] font-medium leading-[1.125rem] text-white"
           >Search</span
         >

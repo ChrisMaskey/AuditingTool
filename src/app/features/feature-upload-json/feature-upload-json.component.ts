@@ -1,9 +1,16 @@
-import { Component, HostListener, inject } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { UploadJsonService } from './application/services/upload-json.service';
 import { UploadJsonFacade } from './application/services/upload-json.facade';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-upload-json',
@@ -18,8 +25,12 @@ import { CommonModule } from '@angular/common';
     },
   ],
 })
-export class UploadJsonComponent {
+export class UploadJsonComponent implements OnInit, OnDestroy {
   private uploadJsonService: UploadJsonFacade = inject(UploadJsonFacade);
+
+  protected clients$ = this.uploadJsonService.clients$;
+  protected banks$ = this.uploadJsonService.banks$;
+  protected accounts$ = this.uploadJsonService.accounts$;
 
   protected uploadJsonForm!: FormGroup;
 
@@ -29,8 +40,42 @@ export class UploadJsonComponent {
   InputElement: HTMLInputElement | undefined;
   fileSize: number | undefined;
 
-  constructor() {
+  private bankSubscription: Subscription | undefined = new Subscription();
+  private accountSubscription: Subscription | undefined = new Subscription();
+
+  constructor() {}
+
+  async ngOnInit(): Promise<void> {
+    //Initialize the form
     this.uploadJsonForm = this.uploadJsonService.uploadJsonForm;
+
+    //Get Clients
+    this.uploadJsonService.getClients();
+
+    //Get Banks
+    this.bankSubscription = this.uploadJsonForm
+      .get('client')
+      ?.valueChanges.subscribe((selectedClient) => {
+        if (selectedClient) {
+          this.uploadJsonService.getBanks(selectedClient.id);
+        }
+      });
+
+    //Get Accounts
+    this.accountSubscription = this.uploadJsonForm
+      .get('bank')
+      ?.valueChanges.subscribe((selectedClient) => {
+        if (selectedClient) {
+          this.uploadJsonService.getAccounts(
+            selectedClient.clientId,
+            selectedClient.bankName
+          );
+        }
+      });
+  }
+  ngOnDestroy(): void {
+    this.bankSubscription?.unsubscribe();
+    this.accountSubscription?.unsubscribe();
   }
 
   resetForm(): void {
@@ -78,6 +123,7 @@ export class UploadJsonComponent {
   }
 
   // @TODO MAKE A DIRECTIVE FOLDER
+  // DIRECTIVES
   @HostListener('dragover', ['$event'])
   onDragOver(event: DragEvent) {
     event.preventDefault();
