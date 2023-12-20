@@ -28,4 +28,7 @@ export abstract class UploadJsonFacade {
    * @param bankName is a bank's name which is used to get the bank account
    */
   abstract getAccounts(clientId: number, bankName: String): Promise<void>;
+
+  abstract clearBanks(): void;
+  abstract clearAccounts(): void;
 }

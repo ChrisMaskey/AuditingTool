@@ -59,6 +59,9 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
       ?.valueChanges.subscribe((selectedClient) => {
         if (selectedClient) {
           this.auditTransactionService.getBanks(selectedClient.id);
+        } else {
+          this.transactionFilterForm.get('bank')?.patchValue(null);
+          this.auditTransactionService.clearBanks();
         }
       });
 
@@ -71,6 +74,9 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
             selectedClient.clientId,
             selectedClient.bankName
           );
+        } else {
+          this.transactionFilterForm.get('accountNumber')?.patchValue(null);
+          this.auditTransactionService.clearAccounts();
         }
       });
   }

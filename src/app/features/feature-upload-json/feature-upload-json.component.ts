@@ -11,6 +11,7 @@ import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { log } from 'console';
 
 @Component({
   selector: 'app-upload-json',
@@ -58,6 +59,9 @@ export class UploadJsonComponent implements OnInit, OnDestroy {
       ?.valueChanges.subscribe((selectedClient) => {
         if (selectedClient) {
           this.uploadJsonService.getBanks(selectedClient.id);
+        } else {
+          this.uploadJsonForm.get('bank')?.patchValue(null);
+          this.uploadJsonService.clearAccounts();
         }
       });
 
@@ -70,16 +74,16 @@ export class UploadJsonComponent implements OnInit, OnDestroy {
             selectedClient.clientId,
             selectedClient.bankName
           );
+        } else {
+          this.uploadJsonForm.get('accountNumber')?.patchValue(null);
+          this.uploadJsonService.clearAccounts();
         }
       });
   }
+
   ngOnDestroy(): void {
     this.bankSubscription?.unsubscribe();
     this.accountSubscription?.unsubscribe();
-  }
-
-  resetForm(): void {
-    this.uploadJsonService.resetForm();
   }
 
   onFileSelected(event: Event): void {
@@ -94,8 +98,7 @@ export class UploadJsonComponent implements OnInit, OnDestroy {
         // Do something with the selected JSON file
         console.log('Selected File:', this.selectedFile);
       } else {
-        // Handle the case when the file is not a JSON file
-        console.log('Selected file is not a JSON file.');
+        this.fileExtension = 'File Type Not Supported';
       }
     }
   }

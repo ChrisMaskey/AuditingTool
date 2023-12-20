@@ -21,8 +21,8 @@ export class UploadJsonService implements UploadJsonFacade {
   private clientSubject = new BehaviorSubject<Client[]>([]);
   clients$ = this.clientSubject.asObservable();
 
-  private banksubject = new BehaviorSubject<Bank[]>([]);
-  banks$ = this.banksubject.asObservable();
+  private bankSubject = new BehaviorSubject<Bank[]>([]);
+  banks$ = this.bankSubject.asObservable();
 
   private accountSubject = new BehaviorSubject<AccountNumber[]>([]);
   accounts$ = this.accountSubject.asObservable();
@@ -72,11 +72,11 @@ export class UploadJsonService implements UploadJsonFacade {
         .pipe(map((response: ApiResponse) => response.data as Bank[]))
         .subscribe({
           next: (bank: Bank[]) => {
-            this.banksubject.next(bank);
+            this.bankSubject.next(bank);
             resolve();
           },
           error: (error) => {
-            this.banksubject.next([]);
+            this.bankSubject.next([]);
             reject(error);
           },
         });
@@ -99,5 +99,13 @@ export class UploadJsonService implements UploadJsonFacade {
           },
         });
     });
+  }
+
+  clearBanks(): void {
+    this.bankSubject.next([]);
+  }
+
+  clearAccounts(): void {
+    this.accountSubject.next([]);
   }
 }

@@ -100,4 +100,12 @@ export class AuditTransactionService implements AuditTransactionFacade {
         });
     });
   }
+
+  clearBanks(): void {
+    this.bankSubject.next([]);
+  }
+
+  clearAccounts(): void {
+    this.accountNumberSubject.next([]);
+  }
 }
