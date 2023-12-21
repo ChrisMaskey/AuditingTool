@@ -39,7 +39,7 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
 
   isOpen: boolean = false;
   pageSize: number = 10;
-  pageNumber: number = 0;
+  pageNumber: number = 1;
 
   private bankSubscription: Subscription | undefined = new Subscription();
   private accountSubscription: Subscription | undefined = new Subscription();
@@ -80,11 +80,15 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
   }
 
   fetchTransactions() {
-    this.formatDate(this.transactionFilterForm.get('date')?.value);
-    this.auditTransactionService.fetchTransactions(
-      this.pageSize,
-      this.pageNumber
-    );
+    if (this.transactionFilterForm.valid) {
+      this.formatDate(this.transactionFilterForm.get('date')?.value);
+      this.auditTransactionService.fetchTransactions(
+        this.pageSize,
+        this.pageNumber
+      );
+    } else {
+      console.log('INVALID FORM');
+    }
   }
 
   resetForm() {
