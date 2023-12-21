@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -22,6 +22,7 @@ import { Subscription } from 'rxjs/internal/Subscription';
     DropdownModule,
     CalendarModule,
   ],
+  providers: [DatePipe],
   templateUrl: './transaction-dropdown.component.html',
   styleUrl: './transaction-dropdown.component.css',
 })
@@ -43,7 +44,7 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
   private bankSubscription: Subscription | undefined = new Subscription();
   private accountSubscription: Subscription | undefined = new Subscription();
 
-  constructor() {}
+  constructor(private datePipe: DatePipe) {}
 
   async ngOnInit(): Promise<void> {
     // Initialize the form
@@ -64,11 +65,11 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
 
     // Get Account Numbers
     this.accountSubscription = this.transactionFilterForm
-      .get('bank')
+      .get('bankName')
       ?.valueChanges.subscribe(() => {
         this.auditTransactionService.getAccounts(
           this.transactionFilterForm.get('clientId')?.value,
-          this.transactionFilterForm.get('bank')?.value
+          this.transactionFilterForm.get('bankName')?.value
         );
       });
   }
@@ -79,6 +80,7 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
   }
 
   fetchTransactions() {
+    this.formatDate(this.transactionFilterForm.get('date')?.value);
     this.auditTransactionService.fetchTransactions(
       this.pageSize,
       this.pageNumber
@@ -95,6 +97,11 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
 
   closeDropdown() {
     this.isOpen = false;
+  }
+
+  private formatDate(date: Date) {
+    const formattedDate = this.datePipe.transform(date, 'MM-yyyy');
+    this.transactionFilterForm.get('date')?.setValue(formattedDate);
   }
 
   @HostListener('document:click', ['$event'])

@@ -1,6 +1,6 @@
 export interface Transaction {
   clientId: string;
-  bank: string;
+  bankName: string;
   accountNumber: string;
   date: Date;
   filterParams: {

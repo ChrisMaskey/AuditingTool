@@ -14,6 +14,7 @@ import { HttpClient } from '@angular/common/http';
 import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
 import { Transaction } from '../entity/transaction.model';
+import { DatePipe } from '@angular/common';
 
 @Injectable()
 export class AuditTransactionService implements AuditTransactionFacade {
@@ -42,7 +43,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
   private initTransactionFilterForm(): void {
     this.transactionFilterForm = this.formBuilder.group({
       clientId: ['', this.requiredValidator],
-      bank: ['', this.requiredValidator],
+      bankName: ['', this.requiredValidator],
       accountNumber: ['', this.requiredValidator],
       date: ['', this.requiredValidator],
       filterParams: this.formBuilder.group({
@@ -120,8 +121,6 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   async fetchTransactions(pageSize: number, pageNumber: number): Promise<void> {
     const formValue = this.transactionFilterForm.value;
-    console.log(this.transactionFilterForm.value);
-
     return new Promise((resolve, reject) => {
       return this.http
         .post<ApiResponse>(FETCH_TRANSACTIONS(pageSize, pageNumber), formValue)

@@ -179,25 +179,28 @@
         class="flex flex-col gap-4 p-6 w-full bg-[#F6F7F9] rounded-[0.625rem]"
       >
         <p-dropdown
-          *ngIf="clients$ | async as client"
-          formControlName="client"
-          [options]="client"
+          *ngIf="clients$ | async as clients"
+          formControlName="clientId"
+          [options]="clients"
           optionLabel="legalName"
           placeholder="Client Name*"
+          [optionValue]="'id'"
         ></p-dropdown>
         <p-dropdown
-          *ngIf="banks$ | async as bank"
+          *ngIf="banks$ | async as banks"
           formControlName="bank"
-          [options]="bank"
+          [options]="banks"
           optionLabel="bankName"
           placeholder="Bank Name*"
+          [optionValue]="'bankName'"
         ></p-dropdown>
         <p-dropdown
-          *ngIf="accounts$ | async as account"
+          *ngIf="accounts$ | async as accounts"
           formControlName="accountNumber"
-          [options]="account"
+          [options]="accounts"
           optionLabel="accountNumber"
           placeholder="Account Number*"
+          [optionValue]="'accountNumber'"
         ></p-dropdown>
       </form>
 

@@ -76,7 +76,7 @@
         </p-dropdown>
         <p-dropdown
           *ngIf="banks$ | async as banks"
-          formControlName="bank"
+          formControlName="bankName"
           [options]="banks"
           optionLabel="bankName"
           placeholder="Bank Name*"
