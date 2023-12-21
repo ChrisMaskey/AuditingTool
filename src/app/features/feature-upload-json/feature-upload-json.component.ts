@@ -1,14 +1,29 @@
-import { Component, HostListener, inject } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { UploadJsonService } from './application/services/upload-json.service';
 import { UploadJsonFacade } from './application/services/upload-json.facade';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-upload-json',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, DropdownModule, CommonModule],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    DropdownModule,
+    CommonModule,
+    ToastModule,
+  ],
   templateUrl: './feature-upload-json.component.html',
   styleUrl: './feature-upload-json.component.css',
   providers: [
@@ -16,10 +31,15 @@ import { CommonModule } from '@angular/common';
       useClass: UploadJsonService,
       provide: UploadJsonFacade,
     },
+    MessageService,
   ],
 })
-export class UploadJsonComponent {
+export class UploadJsonComponent implements OnInit, OnDestroy {
   private uploadJsonService: UploadJsonFacade = inject(UploadJsonFacade);
+
+  protected clients$ = this.uploadJsonService.clients$;
+  protected banks$ = this.uploadJsonService.banks$;
+  protected accounts$ = this.uploadJsonService.accounts$;
 
   protected uploadJsonForm!: FormGroup;
 
@@ -29,12 +49,49 @@ export class UploadJsonComponent {
   InputElement: HTMLInputElement | undefined;
   fileSize: number | undefined;
 
-  constructor() {
+  private bankSubscription: Subscription | undefined = new Subscription();
+  private accountSubscription: Subscription | undefined = new Subscription();
+
+  constructor(private messageService: MessageService) {}
+
+  async ngOnInit(): Promise<void> {
+    //Initialize the form
     this.uploadJsonForm = this.uploadJsonService.uploadJsonForm;
+
+    //Get Clients
+    this.uploadJsonService.getClients();
+
+    //Get Banks
+    this.bankSubscription = this.uploadJsonForm
+      .get('clientId')
+      ?.valueChanges.subscribe((selectedClient) => {
+        if (selectedClient) {
+          this.uploadJsonService.getBanks(selectedClient.id);
+        } else {
+          this.uploadJsonForm.get('bank')?.patchValue(null);
+          this.uploadJsonService.clearAccounts();
+        }
+      });
+
+    //Get Accounts
+    this.accountSubscription = this.uploadJsonForm
+      .get('bank')
+      ?.valueChanges.subscribe((selectedClient) => {
+        if (selectedClient) {
+          this.uploadJsonService.getAccounts(
+            selectedClient.clientId,
+            selectedClient.bankName
+          );
+        } else {
+          this.uploadJsonForm.get('accountNumber')?.patchValue(null);
+          this.uploadJsonService.clearAccounts();
+        }
+      });
   }
 
-  resetForm(): void {
-    this.uploadJsonService.resetForm();
+  ngOnDestroy(): void {
+    this.bankSubscription?.unsubscribe();
+    this.accountSubscription?.unsubscribe();
   }
 
   onFileSelected(event: Event): void {
@@ -49,8 +106,7 @@ export class UploadJsonComponent {
         // Do something with the selected JSON file
         console.log('Selected File:', this.selectedFile);
       } else {
-        // Handle the case when the file is not a JSON file
-        console.log('Selected file is not a JSON file.');
+        this.showError();
       }
     }
   }
@@ -77,7 +133,16 @@ export class UploadJsonComponent {
     }
   }
 
+  showError() {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Unsupported file format. Please upload a file in JSON format.',
+    });
+  }
+
   // @TODO MAKE A DIRECTIVE FOLDER
+  // DIRECTIVES
   @HostListener('dragover', ['$event'])
   onDragOver(event: DragEvent) {
     event.preventDefault();
@@ -101,7 +166,7 @@ export class UploadJsonComponent {
         console.log('Selected File:', this.selectedFile);
       } else {
         // Handle the case when the file is not a JSON file
-        console.log('Selected file is not a JSON file.');
+        this.showError();
       }
     }
   }

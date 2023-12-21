@@ -2,6 +2,20 @@
 <div
   class="flex flex-col items-center justify-center w-full h-full p-5 bg-white rounded-[0.625rem]"
 >
+  <p-toast
+    [showTransformOptions]="'translateY(100%)'"
+    [showTransitionOptions]="'700ms'"
+    [hideTransitionOptions]="'700ms'"
+    [showTransformOptions]="'translateX(100%)'"
+  ></p-toast>
+  <button
+    type="button"
+    pButton
+    pRipple
+    (click)="showError()"
+    label="Error"
+    class="p-button-danger"
+  ></button>
   <div class="flex flex-col items-center gap-5">
     <!-- Upload Json Container -->
     <div class="flex flex-col items-center gap-5">
@@ -165,21 +179,24 @@
         class="flex flex-col gap-4 p-6 w-full bg-[#F6F7F9] rounded-[0.625rem]"
       >
         <p-dropdown
+          *ngIf="clients$ | async as client"
           formControlName="client"
-          [options]=""
-          optionLabel="name"
+          [options]="client"
+          optionLabel="legalName"
           placeholder="Client Name*"
         ></p-dropdown>
         <p-dropdown
+          *ngIf="banks$ | async as bank"
           formControlName="bank"
-          [options]=""
-          optionLabel="name"
+          [options]="bank"
+          optionLabel="bankName"
           placeholder="Bank Name*"
         ></p-dropdown>
         <p-dropdown
+          *ngIf="accounts$ | async as account"
           formControlName="accountNumber"
-          [options]=""
-          optionLabel="name"
+          [options]="account"
+          optionLabel="accountNumber"
           placeholder="Account Number*"
         ></p-dropdown>
       </form>

@@ -1,6 +1,7 @@
 <!-- Dropdown Placeholder with Reset Button -->
 <div class="transaction-dropdown-placeholder">
   <!-- Dropdown placeholder -->
+
   <div
     class="flex items-center justify-between w-full"
     (click)="toggleDropdown()"
@@ -64,33 +65,47 @@
         class="flex flex-col gap-4 w-full"
       >
         <p-dropdown
-          formControlName="client"
-          [options]="cities"
-          optionLabel="name"
+          *ngIf="clients$ | async as clients"
+          formControlName="clientId"
+          [options]="clients"
+          optionLabel="legalName"
           placeholder="Client Name*"
-        ></p-dropdown>
+          [required]="true"
+          [optionValue]="'id'"
+        >
+        </p-dropdown>
         <p-dropdown
+          *ngIf="banks$ | async as banks"
           formControlName="bank"
-          [options]=""
-          optionLabel="name"
+          [options]="banks"
+          optionLabel="bankName"
           placeholder="Bank Name*"
+          [required]="true"
+          [optionValue]="'bankName'"
         ></p-dropdown>
         <p-dropdown
+          *ngIf="accounts$ | async as accounts"
           formControlName="accountNumber"
-          [options]=""
-          optionLabel="name"
+          [options]="accounts"
+          optionLabel="accountNumber"
           placeholder="Account Number*"
+          [required]="true"
+          [optionValue]="'accountNumber'"
         ></p-dropdown>
         <p-calendar
-          [(ngModel)]="date"
-          [iconDisplay]="'input'"
-          [showIcon]="true"
-          inputId="icondisplay"
+          formControlName="date"
+          view="month"
+          dateFormat="mm/yy"
           placeholder="Month-Year"
+          [readonlyInput]="true"
+          [showIcon]="true"
         ></p-calendar>
       </form>
 
-      <button class="p-[0.625rem] rounded-[0.25rem] bg-[#3B82F6] w-full">
+      <button
+        class="p-[0.625rem] rounded-[0.25rem] bg-[#3B82F6] w-full hover:bg-[#2563EB] active:bg-[#1D4ED8] duration-200"
+        (click)="fetchTransactions()"
+      >
         <span class="text-[0.75rem] font-medium leading-[1.125rem] text-white"
           >Search</span
         >

@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  OnDestroy,
   OnInit,
   inject,
 } from '@angular/core';
@@ -10,7 +11,7 @@ import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuditTransactionFacade } from '../application/services/audit-transaction.facade';
 import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
-
+import { Subscription } from 'rxjs/internal/Subscription';
 @Component({
   selector: 'app-transaction-dropdown',
   standalone: true,
@@ -23,31 +24,65 @@ import { CalendarModule } from 'primeng/calendar';
   ],
   templateUrl: './transaction-dropdown.component.html',
   styleUrl: './transaction-dropdown.component.css',
-  providers: [],
 })
-export class TransactionDropdownComponent implements OnInit {
+export class TransactionDropdownComponent implements OnInit, OnDestroy {
   private auditTransactionService: AuditTransactionFacade = inject(
     AuditTransactionFacade
   );
+  protected clients$ = this.auditTransactionService.clients$;
+  protected banks$ = this.auditTransactionService.banks$;
+  protected accounts$ = this.auditTransactionService.accounts$;
+
   private el = inject(ElementRef);
   protected transactionFilterForm!: FormGroup;
 
   isOpen: boolean = false;
-  date: Date | undefined;
-  cities: any[] | undefined;
+  pageSize: number = 10;
+  pageNumber: number = 0;
 
-  constructor() {
+  private bankSubscription: Subscription | undefined = new Subscription();
+  private accountSubscription: Subscription | undefined = new Subscription();
+
+  constructor() {}
+
+  async ngOnInit(): Promise<void> {
+    // Initialize the form
     this.transactionFilterForm =
       this.auditTransactionService.transactionFilterForm;
+
+    // Get Clients
+    this.auditTransactionService.getClients();
+
+    //Get Banks
+    this.bankSubscription = this.transactionFilterForm
+      .get('clientId')
+      ?.valueChanges.subscribe(() => {
+        this.auditTransactionService.getBanks(
+          this.transactionFilterForm.get('clientId')?.value
+        );
+      });
+
+    // Get Account Numbers
+    this.accountSubscription = this.transactionFilterForm
+      .get('bank')
+      ?.valueChanges.subscribe(() => {
+        this.auditTransactionService.getAccounts(
+          this.transactionFilterForm.get('clientId')?.value,
+          this.transactionFilterForm.get('bank')?.value
+        );
+      });
   }
-  ngOnInit(): void {
-    this.cities = [
-      { name: 'New York', code: 'NY' },
-      { name: 'Rome', code: 'RM' },
-      { name: 'London', code: 'LDN' },
-      { name: 'Istanbul', code: 'IST' },
-      { name: 'Paris', code: 'PRS' },
-    ];
+
+  ngOnDestroy(): void {
+    this.bankSubscription?.unsubscribe();
+    this.accountSubscription?.unsubscribe();
+  }
+
+  fetchTransactions() {
+    this.auditTransactionService.fetchTransactions(
+      this.pageSize,
+      this.pageNumber
+    );
   }
 
   resetForm() {
