@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { Client } from '../entity/client.model';
 import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
+import { Transaction } from '../entity/transaction.model';
 
 export abstract class AuditTransactionFacade {
   abstract transactionFilterForm: FormGroup;
@@ -13,13 +14,15 @@ export abstract class AuditTransactionFacade {
   abstract resetForm(): void;
 
   /**
-   * Dropdown
+   * Observers and Observables
    */
 
   abstract clients$: Observable<Client[]>;
   abstract banks$: Observable<Bank[]>;
   abstract accounts$: Observable<AccountNumber[]>;
+  abstract transactions$: Observable<Transaction[]>;
   abstract getClients(): Promise<void>;
+
   /**
    *Get Bank by Client Id
    * @param clientId is a client's id which is used to get the banks
@@ -34,4 +37,13 @@ export abstract class AuditTransactionFacade {
 
   abstract clearBanks(): void;
   abstract clearAccounts(): void;
+
+  /**
+   *@param pageSize is the number of items to be displayed on a page
+   *@param pageNumber is the current page number
+   */
+  abstract fetchTransactions(
+    pageSize: number,
+    pageNumber: number
+  ): Promise<void>;
 }

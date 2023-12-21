@@ -63,7 +63,7 @@ export class UploadJsonComponent implements OnInit, OnDestroy {
 
     //Get Banks
     this.bankSubscription = this.uploadJsonForm
-      .get('client')
+      .get('clientId')
       ?.valueChanges.subscribe((selectedClient) => {
         if (selectedClient) {
           this.uploadJsonService.getBanks(selectedClient.id);

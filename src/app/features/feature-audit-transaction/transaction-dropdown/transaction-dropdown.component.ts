@@ -37,8 +37,8 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
   protected transactionFilterForm!: FormGroup;
 
   isOpen: boolean = false;
-  date: Date | undefined;
-  cities: any[] | undefined;
+  pageSize: number = 10;
+  pageNumber: number = 0;
 
   private bankSubscription: Subscription | undefined = new Subscription();
   private accountSubscription: Subscription | undefined = new Subscription();
@@ -53,37 +53,36 @@ export class TransactionDropdownComponent implements OnInit, OnDestroy {
     // Get Clients
     this.auditTransactionService.getClients();
 
-    // Get Banks
+    //Get Banks
     this.bankSubscription = this.transactionFilterForm
-      .get('client')
-      ?.valueChanges.subscribe((selectedClient) => {
-        if (selectedClient) {
-          this.auditTransactionService.getBanks(selectedClient.id);
-        } else {
-          this.transactionFilterForm.get('bank')?.patchValue(null);
-          this.auditTransactionService.clearBanks();
-        }
+      .get('clientId')
+      ?.valueChanges.subscribe(() => {
+        this.auditTransactionService.getBanks(
+          this.transactionFilterForm.get('clientId')?.value
+        );
       });
 
-    // Get Accounts
+    // Get Account Numbers
     this.accountSubscription = this.transactionFilterForm
       .get('bank')
-      ?.valueChanges.subscribe((selectedClient) => {
-        if (selectedClient) {
-          this.auditTransactionService.getAccounts(
-            selectedClient.clientId,
-            selectedClient.bankName
-          );
-        } else {
-          this.transactionFilterForm.get('accountNumber')?.patchValue(null);
-          this.auditTransactionService.clearAccounts();
-        }
+      ?.valueChanges.subscribe(() => {
+        this.auditTransactionService.getAccounts(
+          this.transactionFilterForm.get('clientId')?.value,
+          this.transactionFilterForm.get('bank')?.value
+        );
       });
   }
 
   ngOnDestroy(): void {
     this.bankSubscription?.unsubscribe();
     this.accountSubscription?.unsubscribe();
+  }
+
+  fetchTransactions() {
+    this.auditTransactionService.fetchTransactions(
+      this.pageSize,
+      this.pageNumber
+    );
   }
 
   resetForm() {

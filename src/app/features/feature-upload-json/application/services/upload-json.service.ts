@@ -37,7 +37,7 @@ export class UploadJsonService implements UploadJsonFacade {
 
   private initUploadJsonForm(): void {
     this.uploadJsonForm = this.formBuilder.group({
-      client: ['', this.requiredValidator],
+      clientId: ['', this.requiredValidator],
       bank: ['', this.requiredValidator],
       accountNumber: ['', this.requiredValidator],
     });

@@ -2,16 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { AuditTransactionFacade } from './audit-transaction.facade';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
+  FETCH_TRANSACTIONS,
   GET_ACCOUNT_NUMBERS,
   GET_BANKS,
   GET_CLIENTS,
 } from '../../../../interfaces/Urls';
-import { BehaviorSubject, Observable, catchError, map, tap } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { Client } from '../entity/client.model';
 import { ApiResponse } from '../../../../interfaces/api-response-interface';
 import { HttpClient } from '@angular/common/http';
 import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
+import { Transaction } from '../entity/transaction.model';
 
 @Injectable()
 export class AuditTransactionService implements AuditTransactionFacade {
@@ -26,6 +28,9 @@ export class AuditTransactionService implements AuditTransactionFacade {
   private accountNumberSubject = new BehaviorSubject<AccountNumber[]>([]);
   accounts$ = this.accountNumberSubject.asObservable();
 
+  private transactionSubject = new BehaviorSubject<Transaction[]>([]);
+  transactions$ = this.transactionSubject.asObservable();
+
   private formBuilder = inject(FormBuilder);
   private requiredValidator = Validators.required;
   public transactionFilterForm!: FormGroup;
@@ -36,10 +41,22 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   private initTransactionFilterForm(): void {
     this.transactionFilterForm = this.formBuilder.group({
-      client: ['', this.requiredValidator],
+      clientId: ['', this.requiredValidator],
       bank: ['', this.requiredValidator],
       accountNumber: ['', this.requiredValidator],
       date: ['', this.requiredValidator],
+      filterParams: this.formBuilder.group({
+        date: [''],
+        transactionMode: [''],
+        name: [''],
+        coa: [''],
+        chequeNumber: [''],
+        transactionType: [''],
+        isEmployee: [true],
+        postedDate: [''],
+        amount: [0],
+        tradeType: [''],
+      }),
     });
   }
 
@@ -96,6 +113,27 @@ export class AuditTransactionService implements AuditTransactionFacade {
           error: (err) => {
             this.accountNumberSubject.next([]);
             reject(err);
+          },
+        });
+    });
+  }
+
+  async fetchTransactions(pageSize: number, pageNumber: number): Promise<void> {
+    const formValue = this.transactionFilterForm.value;
+    console.log(this.transactionFilterForm.value);
+
+    return new Promise((resolve, reject) => {
+      return this.http
+        .post<ApiResponse>(FETCH_TRANSACTIONS(pageSize, pageNumber), formValue)
+        .pipe(map((response: ApiResponse) => response.data as Transaction[]))
+        .subscribe({
+          next: (transaction: Transaction[]) => {
+            this.transactionSubject.next(transaction);
+            resolve();
+          },
+          error: (error) => {
+            this.transactionSubject.next([]);
+            reject(error);
           },
         });
     });

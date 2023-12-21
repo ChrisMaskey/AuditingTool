@@ -65,29 +65,32 @@
         class="flex flex-col gap-4 w-full"
       >
         <p-dropdown
-          *ngIf="clients$ | async as client"
-          formControlName="client"
-          [options]="client"
+          *ngIf="clients$ | async as clients"
+          formControlName="clientId"
+          [options]="clients"
           optionLabel="legalName"
           placeholder="Client Name*"
           [required]="true"
+          [optionValue]="'id'"
         >
         </p-dropdown>
         <p-dropdown
-          *ngIf="banks$ | async as bank"
+          *ngIf="banks$ | async as banks"
           formControlName="bank"
-          [options]="bank"
+          [options]="banks"
           optionLabel="bankName"
           placeholder="Bank Name*"
           [required]="true"
+          [optionValue]="'bankName'"
         ></p-dropdown>
         <p-dropdown
-          *ngIf="accounts$ | async as account"
+          *ngIf="accounts$ | async as accounts"
           formControlName="accountNumber"
-          [options]="account"
+          [options]="accounts"
           optionLabel="accountNumber"
           placeholder="Account Number*"
           [required]="true"
+          [optionValue]="'accountNumber'"
         ></p-dropdown>
         <p-calendar
           formControlName="date"
@@ -101,6 +104,7 @@
 
       <button
         class="p-[0.625rem] rounded-[0.25rem] bg-[#3B82F6] w-full hover:bg-[#2563EB] active:bg-[#1D4ED8] duration-200"
+        (click)="fetchTransactions()"
       >
         <span class="text-[0.75rem] font-medium leading-[1.125rem] text-white"
           >Search</span
