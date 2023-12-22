@@ -2,7 +2,7 @@ export interface Transaction {
   clientId: string;
   bankName: string;
   accountNumber: string;
-  date: Date;
+  date: string;
   filterParams: {
     date: string;
     transactionMode: string;
