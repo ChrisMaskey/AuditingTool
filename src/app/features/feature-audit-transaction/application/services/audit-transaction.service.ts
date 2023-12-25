@@ -7,7 +7,14 @@ import {
   GET_BANKS,
   GET_CLIENTS,
 } from '../../../../interfaces/Urls';
-import { BehaviorSubject, map } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  catchError,
+  map,
+  tap,
+  throwError,
+} from 'rxjs';
 import { Client } from '../entity/client.model';
 import { ApiResponse } from '../../../../interfaces/api-response-interface';
 import { HttpClient } from '@angular/common/http';
@@ -124,7 +131,10 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
-  fetchTransactions(pageSize: number, pageNumber: number): Promise<void> {
+  fetchTransactions(
+    pageSize: number,
+    pageNumber: number
+  ): Promise<FetchApiResponse> {
     const formValue = this.transactionFilterForm.value;
     return new Promise((resolve, reject) => {
       return this.http
@@ -132,16 +142,12 @@ export class AuditTransactionService implements AuditTransactionFacade {
           FETCH_TRANSACTIONS(pageSize, pageNumber),
           formValue
         )
-        .pipe(
-          map(
-            (response: FetchApiResponse) =>
-              response.data.data as FetchTransaction[]
-          )
-        )
         .subscribe({
-          next: (transaction: FetchTransaction[]) => {
-            this.transactionSubject.next(transaction);
-            resolve();
+          next: (response: FetchApiResponse) => {
+            this.transactionSubject.next(
+              response.data.data as FetchTransaction[]
+            );
+            resolve(response);
           },
           error: (error) => {
             this.transactionSubject.next([]);

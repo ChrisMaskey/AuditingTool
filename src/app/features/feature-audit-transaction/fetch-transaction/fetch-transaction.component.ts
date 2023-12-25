@@ -13,8 +13,10 @@ import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-
+import { PaginatorModule } from 'primeng/paginator';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { log } from 'console';
+
 @Component({
   selector: 'app-fetch-transaction',
   standalone: true,
@@ -26,6 +28,7 @@ import { Subscription } from 'rxjs/internal/Subscription';
     CalendarModule,
     TableModule,
     TagModule,
+    PaginatorModule,
   ],
   providers: [DatePipe],
   templateUrl: './fetch-transaction.component.html',
@@ -44,9 +47,10 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   protected transactionFilterForm!: FormGroup;
 
   isOpen: boolean = false;
-  pageSize: number = 9;
+  pageSize: number = 8;
   pageNumber: number = 1;
-  fetchTransaction: boolean | null = false;
+  fetchTransaction: boolean | null = null;
+  totalCount: number = 0;
 
   private bankSubscription: Subscription | undefined = new Subscription();
   private accountSubscription: Subscription | undefined = new Subscription();
@@ -86,18 +90,30 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.accountSubscription?.unsubscribe();
   }
 
-  fetchTransactions() {
+  async fetchTransactions() {
     if (this.transactionFilterForm.valid) {
       this.formatDate(this.transactionFilterForm.get('date')?.value);
-      this.auditTransactionService
+
+      const response = await this.auditTransactionService
         .fetchTransactions(this.pageSize, this.pageNumber)
-        .then(() => {
-          this.closeDropdown();
+        .then((response) => {
+          this.totalCount = response.data.totalCount;
           this.fetchTransaction = true;
+          this.pageNumber = response.data.pageNumber;
+          this.closeDropdown();
+        })
+        .catch((error) => {
+          console.log(error);
         });
     } else {
+      // @TODO Add reactive form validator
       console.log('INVALID FORM');
     }
+  }
+
+  onPageChange(event: any) {
+    this.pageNumber = event.page + 1;
+    this.fetchTransactions();
   }
 
   resetForm() {
@@ -156,7 +172,12 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     return formattedAmount;
   }
 
-  private formatDate(date: Date): void {
+  private formatDate(date: Date | string): void {
+    if (typeof date === 'string') {
+      const [month, year] = date.split('-');
+      date = new Date(+year, +month - 1); // Months are zero-based
+    }
+
     const formattedDate = this.datePipe.transform(date, 'MM-yyyy');
     this.transactionFilterForm.get('date')?.setValue(formattedDate);
   }

@@ -5,6 +5,7 @@ import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
 import { Transaction } from '../entity/transaction.model';
 import { FetchTransaction } from '../entity/fetch-transaction.model';
+import { FetchApiResponse } from '../../../../interfaces/fetch-api-response.interface';
 
 export abstract class AuditTransactionFacade {
   abstract transactionFilterForm: FormGroup;
@@ -46,5 +47,5 @@ export abstract class AuditTransactionFacade {
   abstract fetchTransactions(
     pageSize: number,
     pageNumber: number
-  ): Promise<void>;
+  ): Promise<FetchApiResponse>;
 }
