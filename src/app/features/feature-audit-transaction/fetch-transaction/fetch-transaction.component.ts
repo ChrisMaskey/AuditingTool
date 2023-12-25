@@ -15,7 +15,6 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { PaginatorModule } from 'primeng/paginator';
 import { Subscription } from 'rxjs/internal/Subscription';
-import { log } from 'console';
 
 @Component({
   selector: 'app-fetch-transaction',
@@ -49,7 +48,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   isOpen: boolean = false;
   pageSize: number = 8;
   pageNumber: number = 1;
-  fetchTransaction: boolean | null = null;
+  fetchTransaction: boolean | null = false;
   totalCount: number = 0;
 
   private bankSubscription: Subscription | undefined = new Subscription();
@@ -97,17 +96,21 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
       const response = await this.auditTransactionService
         .fetchTransactions(this.pageSize, this.pageNumber)
         .then((response) => {
-          this.totalCount = response.data.totalCount;
-          this.fetchTransaction = true;
-          this.pageNumber = response.data.pageNumber;
-          this.closeDropdown();
+          if (response.data !== null) {
+            this.totalCount = response.data.totalCount;
+            this.fetchTransaction = true;
+            this.pageNumber = response.data.pageNumber;
+            this.closeDropdown();
+          } else {
+            this.fetchTransaction = null;
+          }
         })
         .catch((error) => {
           console.log(error);
         });
     } else {
       // @TODO Add reactive form validator
-      console.log('INVALID FORM');
+      alert('Invalid Form.');
     }
   }
 

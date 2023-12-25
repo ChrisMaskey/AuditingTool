@@ -78,6 +78,11 @@
   border-radius: 0.25rem;
 }
 
+/* PrimeNg Button */
+:host ::ng-deep .p-button.p-component {
+  @apply flex items-center justify-center gap-[0.4375rem] px-[1.09375rem] py-[0.65625rem] ring-0;
+}
+
 /* TEXTS */
 .heading {
   @apply text-center text-[1rem] font-semibold leading-[1.375rem] !important;
