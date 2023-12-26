@@ -1,12 +1,5 @@
 <!-- Transaction Container -->
-<div class="flex flex-col gap-44 w-full h-full p-5 bg-white rounded-[0.625rem]">
+<div class="flex flex-col w-full h-full p-5 gap-5 bg-white rounded-[0.625rem]">
   <!-- Dropdown Placeholder and Add Transaction -->
-  <div class="flex items-center justify-between">
-    <app-transaction-dropdown></app-transaction-dropdown>
-
-    <!--@TODO Add Button After Transaction Table Fetch-->
-  </div>
-
-  <!-- Transaction Table or Error Placeholder -->
-  <app-transaction-table></app-transaction-table>
+  <app-fetch-transaction class="w-full h-full"></app-fetch-transaction>
 </div>

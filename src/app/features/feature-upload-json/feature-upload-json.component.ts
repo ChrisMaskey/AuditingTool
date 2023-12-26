@@ -64,28 +64,20 @@ export class UploadJsonComponent implements OnInit, OnDestroy {
     //Get Banks
     this.bankSubscription = this.uploadJsonForm
       .get('clientId')
-      ?.valueChanges.subscribe((selectedClient) => {
-        if (selectedClient) {
-          this.uploadJsonService.getBanks(selectedClient.id);
-        } else {
-          this.uploadJsonForm.get('bank')?.patchValue(null);
-          this.uploadJsonService.clearAccounts();
-        }
+      ?.valueChanges.subscribe(() => {
+        this.uploadJsonService.getBanks(
+          this.uploadJsonForm.get('clientId')?.value
+        );
       });
 
-    //Get Accounts
+    // Get Account Numbers
     this.accountSubscription = this.uploadJsonForm
       .get('bank')
-      ?.valueChanges.subscribe((selectedClient) => {
-        if (selectedClient) {
-          this.uploadJsonService.getAccounts(
-            selectedClient.clientId,
-            selectedClient.bankName
-          );
-        } else {
-          this.uploadJsonForm.get('accountNumber')?.patchValue(null);
-          this.uploadJsonService.clearAccounts();
-        }
+      ?.valueChanges.subscribe(() => {
+        this.uploadJsonService.getAccounts(
+          this.uploadJsonForm.get('clientId')?.value,
+          this.uploadJsonForm.get('bank')?.value
+        );
       });
   }
 

@@ -2,11 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { UploadJsonFacade } from './upload-json.facade';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import { Client } from '../../../feature-audit-transaction/application/entity/client.model';
-import { Bank } from '../../../feature-audit-transaction/application/entity/bank.model';
 import { HttpClient } from '@angular/common/http';
-import { AccountNumber } from '../../../feature-audit-transaction/application/entity/account-number.model';
 import { ApiResponse } from '../../../../interfaces/api-response-interface';
+import { Client } from '../entity/client.model';
+import { Bank } from '../entity/bank.model';
+import { AccountNumber } from '../entity/account-number.model';
 import {
   GET_ACCOUNT_NUMBERS,
   GET_BANKS,

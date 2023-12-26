@@ -13,7 +13,8 @@ import { ApiResponse } from '../../../../interfaces/api-response-interface';
 import { HttpClient } from '@angular/common/http';
 import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
-import { Transaction } from '../entity/transaction.model';
+import { FetchApiResponse } from '../../../../interfaces/fetch-api-response.interface';
+import { FetchTransaction } from '../entity/fetch-transaction.model';
 
 @Injectable()
 export class AuditTransactionService implements AuditTransactionFacade {
@@ -28,7 +29,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
   private accountNumberSubject = new BehaviorSubject<AccountNumber[]>([]);
   accounts$ = this.accountNumberSubject.asObservable();
 
-  private transactionSubject = new BehaviorSubject<Transaction[]>([]);
+  private transactionSubject = new BehaviorSubject<FetchTransaction[]>([]);
   transactions$ = this.transactionSubject.asObservable();
 
   private formBuilder = inject(FormBuilder);
@@ -42,7 +43,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
   private initTransactionFilterForm(): void {
     this.transactionFilterForm = this.formBuilder.group({
       clientId: ['', this.requiredValidator],
-      bank: ['', this.requiredValidator],
+      bankName: ['', this.requiredValidator],
       accountNumber: ['', this.requiredValidator],
       date: ['', this.requiredValidator],
       filterParams: this.formBuilder.group({
@@ -60,8 +61,11 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
-  public resetForm(): void {
-    this.transactionFilterForm.reset();
+  public resetForm(): Promise<void> {
+    return new Promise((resolve) => {
+      this.transactionFilterForm.reset();
+      resolve();
+    });
   }
 
   async getClients(): Promise<void> {
@@ -118,18 +122,23 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
-  async fetchTransactions(pageSize: number, pageNumber: number): Promise<void> {
+  fetchTransactions(
+    pageSize: number,
+    pageNumber: number
+  ): Promise<FetchApiResponse> {
     const formValue = this.transactionFilterForm.value;
-    console.log(this.transactionFilterForm.value);
-
     return new Promise((resolve, reject) => {
       return this.http
-        .post<ApiResponse>(FETCH_TRANSACTIONS(pageSize, pageNumber), formValue)
-        .pipe(map((response: ApiResponse) => response.data as Transaction[]))
+        .post<FetchApiResponse>(
+          FETCH_TRANSACTIONS(pageSize, pageNumber),
+          formValue
+        )
         .subscribe({
-          next: (transaction: Transaction[]) => {
-            this.transactionSubject.next(transaction);
-            resolve();
+          next: (response: FetchApiResponse) => {
+            this.transactionSubject.next(
+              response.data.data as FetchTransaction[]
+            );
+            resolve(response);
           },
           error: (error) => {
             this.transactionSubject.next([]);

@@ -4,6 +4,8 @@ import { Client } from '../entity/client.model';
 import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
 import { Transaction } from '../entity/transaction.model';
+import { FetchTransaction } from '../entity/fetch-transaction.model';
+import { FetchApiResponse } from '../../../../interfaces/fetch-api-response.interface';
 
 export abstract class AuditTransactionFacade {
   abstract transactionFilterForm: FormGroup;
@@ -11,7 +13,7 @@ export abstract class AuditTransactionFacade {
   /**
    * Resets the Transaction Filter Form
    */
-  abstract resetForm(): void;
+  abstract resetForm(): Promise<void>;
 
   /**
    * Observers and Observables
@@ -20,7 +22,7 @@ export abstract class AuditTransactionFacade {
   abstract clients$: Observable<Client[]>;
   abstract banks$: Observable<Bank[]>;
   abstract accounts$: Observable<AccountNumber[]>;
-  abstract transactions$: Observable<Transaction[]>;
+  abstract transactions$: Observable<FetchTransaction[]>;
   abstract getClients(): Promise<void>;
 
   /**
@@ -45,5 +47,5 @@ export abstract class AuditTransactionFacade {
   abstract fetchTransactions(
     pageSize: number,
     pageNumber: number
-  ): Promise<void>;
+  ): Promise<FetchApiResponse>;
 }
