@@ -58,7 +58,7 @@
       </svg>
     </div>
 
-    <p-button *ngIf="fetchTransaction">
+    <p-button *ngIf="fetchTransaction" (click)="openAddDialog()">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="15"
@@ -223,11 +223,17 @@
         </tr>
       </ng-template>
     </p-table>
-    <p-paginator
-      [rows]="pageSize"
-      [totalRecords]="totalCount"
-      (onPageChange)="onPageChange($event)"
-    ></p-paginator>
+    <div class="flex items-center justify-end gap-[0.25025rem]">
+      <div class="text-sm leading-[1.3125rem] text-[#6C757D]">
+        {{ calculateStartIndex() }} to {{ calculateEndIndex() }} of
+        {{ totalCount }} entries
+      </div>
+      <p-paginator
+        [rows]="pageSize"
+        [totalRecords]="totalCount"
+        (onPageChange)="onPageChange($event)"
+      ></p-paginator>
+    </div>
   </ng-container>
 
   <!-- Content if no transaction found -->
@@ -371,3 +377,8 @@
     </div>
   </div>
 </ng-container>
+
+<app-add-transaction
+  [addModalVisible]="addModalVisible"
+  (closeModalEvent)="closeAddDialog()"
+></app-add-transaction>

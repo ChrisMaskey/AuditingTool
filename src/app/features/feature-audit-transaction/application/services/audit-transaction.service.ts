@@ -7,21 +7,12 @@ import {
   GET_BANKS,
   GET_CLIENTS,
 } from '../../../../interfaces/Urls';
-import {
-  BehaviorSubject,
-  Observable,
-  catchError,
-  map,
-  tap,
-  throwError,
-} from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { Client } from '../entity/client.model';
 import { ApiResponse } from '../../../../interfaces/api-response-interface';
 import { HttpClient } from '@angular/common/http';
 import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
-import { Transaction } from '../entity/transaction.model';
-import { DatePipe } from '@angular/common';
 import { FetchApiResponse } from '../../../../interfaces/fetch-api-response.interface';
 import { FetchTransaction } from '../entity/fetch-transaction.model';
 

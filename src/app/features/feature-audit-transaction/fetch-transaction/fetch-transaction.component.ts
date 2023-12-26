@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  Input,
   OnDestroy,
   OnInit,
   inject,
@@ -14,12 +15,15 @@ import { CalendarModule } from 'primeng/calendar';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { PaginatorModule } from 'primeng/paginator';
+import { DialogModule } from 'primeng/dialog';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { AddTransactionComponent } from '../add-transaction/add-transaction/add-transaction.component';
 
 @Component({
   selector: 'app-fetch-transaction',
   standalone: true,
   imports: [
+    AddTransactionComponent,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -28,6 +32,7 @@ import { Subscription } from 'rxjs/internal/Subscription';
     TableModule,
     TagModule,
     PaginatorModule,
+    DialogModule,
   ],
   providers: [DatePipe],
   templateUrl: './fetch-transaction.component.html',
@@ -46,9 +51,10 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   protected transactionFilterForm!: FormGroup;
 
   isOpen: boolean = false;
+  fetchTransaction: boolean | null = false;
+  addModalVisible: boolean = false;
   pageSize: number = 8;
   pageNumber: number = 1;
-  fetchTransaction: boolean | null = false;
   totalCount: number = 0;
 
   private bankSubscription: Subscription | undefined = new Subscription();
@@ -125,6 +131,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Toggle Search Dropdown
   toggleDropdown(): void {
     this.isOpen = !this.isOpen;
   }
@@ -133,11 +140,21 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.isOpen = false;
   }
 
+  // Toggle Add Transaction Dropdown
+  openAddDialog() {
+    this.addModalVisible = true;
+  }
+
+  closeAddDialog() {
+    this.addModalVisible = false;
+  }
+
+  // Change color of chip
   getTransactionSeverity(status: string): 'success' | 'warning' | undefined {
     switch (status) {
       case 'Deposit':
         return 'success';
-      case 'Deposit':
+      case 'Withdrawal':
         return 'warning';
       default:
         return undefined;
@@ -166,6 +183,17 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Paginator Page Index
+  calculateStartIndex() {
+    return (this.pageNumber - 1) * this.pageSize + 1;
+  }
+
+  calculateEndIndex() {
+    const endIndex = this.pageNumber * this.pageSize;
+    return endIndex > this.totalCount ? this.totalCount : endIndex;
+  }
+
+  // Format Amount
   formatAmount(amount: number): string {
     const formattedAmount = new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
@@ -175,6 +203,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     return formattedAmount;
   }
 
+  // Format Date to MM-YYYY
   private formatDate(date: Date | string): void {
     if (typeof date === 'string') {
       const [month, year] = date.split('-');

@@ -1,0 +1,56 @@
+/* PrimeNg Modal */
+:host ::ng-deep .p-dialog-header {
+  display: none;
+}
+
+:host ::ng-deep .p-dialog.p-component {
+  @apply rounded-[1.25rem];
+}
+
+:host ::ng-deep .ng-tns-c4042076560-0.p-dialog-content {
+  @apply rounded-[1.25rem] pt-[1.875rem] pb-[3.125rem] px-[6.25rem] !important;
+}
+
+/* DROPDOWN */
+:host ::ng-deep .p-dropdown {
+  width: 100%;
+}
+
+:host ::ng-deep .p-dropdown-label {
+  padding: 0.65625rem;
+}
+
+:host ::ng-deep .p-dropdown-label.p-inputtext.p-placeholder.ng-star-inserted {
+  font-size: 0.75rem !important;
+  font-weight: 400;
+}
+
+:host ::ng-deep .p-calendar {
+  width: 100%;
+}
+
+:host ::ng-deep .p-calendar-w-btn .p-inputtext {
+  @apply rounded-[0.375rem] !important;
+}
+
+:host ::ng-deep .p-inputtext.p-component {
+  font-size: 0.75rem !important;
+  font-weight: 400;
+  padding: 0.65625rem;
+}
+
+:host ::ng-deep .ng-star-inserted {
+  font-size: 0.75rem !important;
+  font-weight: 400;
+}
+
+:host ::ng-deep .p-datepicker-trigger {
+  position: absolute;
+  right: 0;
+  border: none;
+  background-color: transparent !important;
+}
+
+:host ::ng-deep calendaricon {
+  color: #6c757d;
+}
