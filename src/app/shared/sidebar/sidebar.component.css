@@ -18,6 +18,9 @@
 .active-sm {
   @apply bg-[#E6F7FF] px-4 py-[0.5625rem]  w-full;
 }
+.active-sm svg {
+  fill: #3b82f6;
+}
 
 .active-sm div {
   @apply bg-[#3B82F6];

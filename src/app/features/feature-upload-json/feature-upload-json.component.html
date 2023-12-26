@@ -2,103 +2,213 @@
 <div
   class="flex flex-col items-center justify-center w-full h-full p-5 bg-white rounded-[0.625rem]"
 >
-  <!-- Upload Json Container -->
+  <p-toast
+    [showTransformOptions]="'translateY(100%)'"
+    [showTransitionOptions]="'700ms'"
+    [hideTransitionOptions]="'700ms'"
+    [showTransformOptions]="'translateX(100%)'"
+  ></p-toast>
+  <button
+    type="button"
+    pButton
+    pRipple
+    (click)="showError()"
+    label="Error"
+    class="p-button-danger"
+  ></button>
   <div class="flex flex-col items-center gap-5">
-    <!-- Header and Upload -->
-    <div class="flex flex-col items-center justify-center gap-[1.875rem]">
-      <!-- Header -->
-      <div class="flex flex-col items-center justify-center gap-[0.625rem]">
-        <h3 class="text-xl leading-[1.875]">Please upload your json file</h3>
-        <h6 class="text-sm leading-[1.3125rem]">
-          Select relevant documents to upload your file
-        </h6>
+    <!-- Upload Json Container -->
+    <div class="flex flex-col items-center gap-5">
+      <!-- Header and Upload -->
+      <div class="flex flex-col items-center justify-center gap-[1.875rem]">
+        <!-- Header -->
+        <div class="flex flex-col items-center justify-center gap-[0.625rem]">
+          <h3 class="text-xl leading-[1.875]">Please upload your json file</h3>
+          <h6 class="text-sm leading-[1.3125rem] text-[#00000099]">
+            Select relevant documents to upload your file
+          </h6>
+        </div>
       </div>
-    </div>
 
-    <!-- Upload -->
-    <!-- @TODO Add Drag and Drop feature to the following div -->
-    <div
-      class="flex items-center justify-center w-full px-8 py-4 gap-6 border border-dashed border-[#00000040] rounded-[0.625rem]"
-    >
-      <!-- SVG -->
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="48"
-        height="48"
-        viewBox="0 0 48 48"
-        fill="none"
+      <!-- Upload -->
+      <!-- @TODO Add Drag and Drop feature to the following div -->
+      <div
+        class="flex items-center justify-center w-full px-8 py-4 gap-6 border border-dashed border-[#00000040] rounded-[0.625rem]"
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($event)"
       >
-        <path
-          d="M32 32L24 24L16 32"
-          stroke="black"
-          stroke-opacity="0.4"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-        <path
-          d="M24 24V42"
-          stroke="#ABC9FB"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-        <path
-          d="M40.7799 36.78C42.7306 35.7165 44.2716 34.0337 45.1597 31.9972C46.0477 29.9607 46.2323 27.6864 45.6843 25.5334C45.1363 23.3803 43.8869 21.471 42.1333 20.1069C40.3796 18.7427 38.2216 18.0014 35.9999 18H33.4799C32.8745 15.6585 31.7462 13.4846 30.1798 11.642C28.6134 9.79927 26.6496 8.33567 24.4361 7.36118C22.2226 6.3867 19.817 5.92669 17.4002 6.01573C14.9833 6.10478 12.6181 6.74057 10.4823 7.8753C8.34649 9.01003 6.49574 10.6142 5.06916 12.5671C3.64259 14.5201 2.6773 16.771 2.24588 19.1508C1.81446 21.5305 1.92813 23.977 2.57835 26.3065C3.22856 28.636 4.3984 30.7877 5.99992 32.6"
-          stroke="#326FD1"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-        <path
-          d="M32 32L24 24L16 32"
-          stroke="#3B82F6"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-
-      <div class="flex items-center gap-[8.5rem]">
-        <h3 class="text-[0.8125rem]">Select a file or drag and drop here</h3>
-        <!-- @TODO Change the button to PRIMENG Button -->
-        <button
-          class="flex items-center py-3 px-4 bg-[#3B82F6] border border-[#3B82F6] rounded-[0.3125rem]"
+        <!-- SVG -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48"
+          viewBox="0 0 48 48"
+          fill="none"
         >
-          <span class="text-[0.625rem] text-white">SELECT FILE</span>
-        </button>
+          <path
+            d="M32 32L24 24L16 32"
+            stroke="black"
+            stroke-opacity="0.4"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M24 24V42"
+            stroke="#ABC9FB"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M40.7799 36.78C42.7306 35.7165 44.2716 34.0337 45.1597 31.9972C46.0477 29.9607 46.2323 27.6864 45.6843 25.5334C45.1363 23.3803 43.8869 21.471 42.1333 20.1069C40.3796 18.7427 38.2216 18.0014 35.9999 18H33.4799C32.8745 15.6585 31.7462 13.4846 30.1798 11.642C28.6134 9.79927 26.6496 8.33567 24.4361 7.36118C22.2226 6.3867 19.817 5.92669 17.4002 6.01573C14.9833 6.10478 12.6181 6.74057 10.4823 7.8753C8.34649 9.01003 6.49574 10.6142 5.06916 12.5671C3.64259 14.5201 2.6773 16.771 2.24588 19.1508C1.81446 21.5305 1.92813 23.977 2.57835 26.3065C3.22856 28.636 4.3984 30.7877 5.99992 32.6"
+            stroke="#326FD1"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M32 32L24 24L16 32"
+            stroke="#3B82F6"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+
+        <div class="flex items-center gap-[8.5rem]">
+          <h3 class="text-[0.8125rem]">Select a file or drag and drop here</h3>
+          <button
+            class="flex items-center py-3 px-4 bg-[#3B82F6] border border-[#3B82F6] rounded-[0.3125rem] hover:bg-[#2563EB] active:bg-[#1D4ED8] duration-200"
+            (click)="fileInput.click()"
+          >
+            <span class="text-[0.625rem] text-white">SELECT FILE</span>
+          </button>
+
+          <input
+            #fileInput
+            type="file"
+            style="display: none"
+            (change)="onFileSelected($event)"
+          />
+        </div>
       </div>
+
+      <!-- File Container If File Extension Is JSON-->
+      <ng-container *ngIf="fileExtension === 'json'">
+        <div class="flex flex-col items-start relative gap-4 px-8 w-full">
+          <h6 class="text-sm">File added</h6>
+          <!-- File -->
+          <div
+            class="group flex items-center gap-4 p-4 w-full hover:bg-[#F2F2F2] hover:rounded-[0.3125rem] duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <g clip-path="url(#clip0_633_1018)">
+                <path
+                  d="M9.75293 11C10.0484 11 10.341 10.9418 10.614 10.8287C10.887 10.7157 11.135 10.5499 11.3439 10.341C11.5529 10.1321 11.7186 9.88402 11.8317 9.61104C11.9447 9.33806 12.0029 9.04547 12.0029 8.75C12.0029 8.45453 11.9447 8.16194 11.8317 7.88896C11.7186 7.61598 11.5529 7.36794 11.3439 7.15901C11.135 6.95008 10.887 6.78434 10.614 6.67127C10.341 6.5582 10.0484 6.5 9.75293 6.5C9.15619 6.5 8.5839 6.73705 8.16194 7.15901C7.73998 7.58097 7.50293 8.15326 7.50293 8.75C7.50293 9.34674 7.73998 9.91903 8.16194 10.341C8.5839 10.7629 9.15619 11 9.75293 11Z"
+                  fill="#3B82F6"
+                />
+                <path
+                  d="M21 21.5C21 22.2956 20.6839 23.0587 20.1213 23.6213C19.5587 24.1839 18.7956 24.5 18 24.5H6C5.20435 24.5 4.44129 24.1839 3.87868 23.6213C3.31607 23.0587 3 22.2956 3 21.5V3.5C3 2.70435 3.31607 1.94129 3.87868 1.37868C4.44129 0.816071 5.20435 0.5 6 0.5L14.25 0.5L21 7.25V21.5ZM6 2C5.60218 2 5.22064 2.15804 4.93934 2.43934C4.65804 2.72064 4.5 3.10218 4.5 3.5V18.5L7.836 15.164C7.95422 15.0461 8.10843 14.9709 8.27417 14.9506C8.43992 14.9302 8.60773 14.9657 8.751 15.0515L12 17L15.2355 12.47C15.2988 12.3815 15.3806 12.3078 15.4753 12.254C15.5699 12.2003 15.6751 12.1678 15.7836 12.1588C15.8921 12.1498 16.0012 12.1645 16.1034 12.202C16.2056 12.2394 16.2985 12.2986 16.3755 12.3755L19.5 15.5V7.25H16.5C15.9033 7.25 15.331 7.01295 14.909 6.59099C14.4871 6.16903 14.25 5.59674 14.25 5V2H6Z"
+                  fill="#3B82F6"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_633_1018">
+                  <rect
+                    width="24"
+                    height="24"
+                    fill="white"
+                    transform="translate(0 0.5)"
+                  />
+                </clipPath>
+              </defs>
+            </svg>
+            <div class="flex items-center gap-2 w-full">
+              <h6 class="text-[0.75rem]">{{ fileName }}</h6>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="3"
+                height="3"
+                viewBox="0 0 4 3"
+                fill="none"
+              >
+                <circle cx="2" cy="1.5" r="1.5" fill="#767676" />
+              </svg>
+              <div class="flex items-center justify-between w-full">
+                <h6
+                  class="text-[0.75rem] text-[#3B82F6] hover:text-[#1D4ED8] duration-200 cursor-pointer"
+                  (click)="openFile()"
+                >
+                  Preview
+                </h6>
+                <h6 class="text-[0.625rem]">{{ fileSize }}MB</h6>
+              </div>
+            </div>
+            <!-- Close Icon -->
+            <div
+              class="hidden absolute top-7 right-6 rounded-full p-1 bg-[#3B82F6] group-hover:block cursor-pointer hover:bg-[#2563EB] active:bg-[#1D4ED8] duration-200"
+              (click)="closeAddedFile()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M8.62676 7.99995L11.8668 4.75995C11.9396 4.67493 11.9776 4.56556 11.9733 4.45371C11.969 4.34185 11.9226 4.23575 11.8435 4.15659C11.7643 4.07744 11.6582 4.03107 11.5463 4.02675C11.4345 4.02243 11.3251 4.06048 11.2401 4.13329L8.0001 7.37329L4.7601 4.12884C4.67507 4.05603 4.56571 4.01798 4.45385 4.0223C4.34199 4.02662 4.23589 4.07299 4.15674 4.15215C4.07758 4.2313 4.03121 4.33741 4.02689 4.44926C4.02257 4.56112 4.06062 4.67049 4.13343 4.75551L7.37343 7.99995L4.12899 11.24C4.08246 11.2798 4.04467 11.3288 4.018 11.384C3.99132 11.4391 3.97633 11.4992 3.97396 11.5604C3.9716 11.6216 3.98191 11.6826 4.00426 11.7397C4.0266 11.7967 4.06049 11.8485 4.10381 11.8918C4.14712 11.9351 4.19892 11.969 4.25595 11.9913C4.31299 12.0137 4.37402 12.024 4.43523 12.0216C4.49644 12.0193 4.5565 12.0043 4.61164 11.9776C4.66678 11.9509 4.71581 11.9131 4.75565 11.8666L8.0001 8.62662L11.2401 11.8666C11.3251 11.9394 11.4345 11.9775 11.5463 11.9732C11.6582 11.9688 11.7643 11.9225 11.8435 11.8433C11.9226 11.7642 11.969 11.6581 11.9733 11.5462C11.9776 11.4343 11.9396 11.325 11.8668 11.24L8.62676 7.99995Z"
+                  fill="white"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Dropdown/Form -->
+      <form
+        [formGroup]="uploadJsonForm"
+        class="flex flex-col gap-4 p-6 w-full bg-[#F6F7F9] rounded-[0.625rem]"
+      >
+        <p-dropdown
+          *ngIf="clients$ | async as clients"
+          formControlName="clientId"
+          [options]="clients"
+          optionLabel="legalName"
+          placeholder="Client Name*"
+          [optionValue]="'id'"
+        ></p-dropdown>
+        <p-dropdown
+          *ngIf="banks$ | async as banks"
+          formControlName="bank"
+          [options]="banks"
+          optionLabel="bankName"
+          placeholder="Bank Name*"
+          [optionValue]="'bankName'"
+        ></p-dropdown>
+        <p-dropdown
+          *ngIf="accounts$ | async as accounts"
+          formControlName="accountNumber"
+          [options]="accounts"
+          optionLabel="accountNumber"
+          placeholder="Account Number*"
+          [optionValue]="'accountNumber'"
+        ></p-dropdown>
+      </form>
+
+      <button
+        class="flex items-center justify-center py-[0.65625rem] px-[1.1rem] bg-[#3B82F6] border border-[#3B82F6] rounded-[0.3125rem] w-full hover:bg-[#2563EB] active:bg-[#1D4ED8] duration-200"
+      >
+        <span class="text-sm text-white">Save</span>
+      </button>
     </div>
-
-    <!-- Dropdown/Form -->
-    <form
-      [formGroup]="uploadJsonForm"
-      class="flex flex-col gap-4 p-6 w-full bg-[#F6F7F9] rounded-[0.625rem]"
-    >
-      <p-dropdown
-        formControlName="client"
-        [options]=""
-        optionLabel="name"
-        placeholder="Client Name*"
-      ></p-dropdown>
-      <p-dropdown
-        formControlName="bank"
-        [options]=""
-        optionLabel="name"
-        placeholder="Bank Name*"
-      ></p-dropdown>
-      <p-dropdown
-        formControlName="accountNumber"
-        [options]=""
-        optionLabel="name"
-        placeholder="Account Number*"
-      ></p-dropdown>
-    </form>
-
-    <button
-      class="flex items-center justify-center py-[0.65625rem] px-[1.1rem] bg-[#3B82F6] border border-[#3B82F6] rounded-[0.3125rem] w-full"
-    >
-      <span class="text-sm text-white">Save</span>
-    </button>
   </div>
 </div>
