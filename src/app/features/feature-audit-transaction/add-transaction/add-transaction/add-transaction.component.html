@@ -21,7 +21,10 @@
       >
         Add new transaction
       </h2>
-      <form class="flex flex-col items-start justify-center gap-5 w-full">
+      <form
+        [formGroup]="addTransactionForm"
+        class="flex flex-col items-start justify-center gap-5 w-full"
+      >
         <div class="flex items-center justify-between gap-10 w-full">
           <p-calendar
             formControlName="date"
@@ -31,60 +34,108 @@
             class="w-full"
           ></p-calendar>
           <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
-            placeholder="Client Name*"
+            *ngIf="coa$ | async as coa"
+            formControlName="coa"
+            [options]="coa"
+            optionLabel="coa"
+            placeholder="COA"
             [required]="true"
-            [optionValue]="'id'"
             class="w-full"
           >
           </p-dropdown>
         </div>
+
         <div class="flex items-center justify-between gap-10 w-full">
-          <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
-            placeholder="Transaction Type"
-            [required]="true"
-            [optionValue]="'id'"
-            class="w-full"
-          >
-          </p-dropdown>
-          <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
-            placeholder="Name"
-            [required]="true"
-            [optionValue]="'id'"
-            class="w-full"
-          >
-          </p-dropdown>
+          <div class="flex flex-col gap-5 w-full">
+            <p-dropdown
+              formControlName="transactionType"
+              [options]="transactionType"
+              optionLabel="type"
+              placeholder="Transaction Type"
+              [required]="true"
+              [optionValue]="'value'"
+              class="w-full"
+            >
+            </p-dropdown>
+
+            <ng-container
+              *ngIf="
+                this.addTransactionForm.get('transactionType')?.value === 1
+              "
+            >
+              <div class="flex items-center justify-between">
+                <p-radioButton
+                  value="3"
+                  formControlName="tradeType"
+                  label="Employee"
+                ></p-radioButton>
+                <p-radioButton
+                  value="1"
+                  formControlName="tradeType"
+                  label="Vendor"
+                ></p-radioButton>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="flex flex-col gap-5 w-full">
+            <p-dropdown
+              formControlName="employeeName"
+              [options]=""
+              optionLabel="legalName"
+              placeholder="Name"
+              [required]="true"
+              [optionValue]="'id'"
+              class="w-full"
+            >
+            </p-dropdown>
+            <div
+              *ngIf="
+                this.addTransactionForm.get('transactionType')?.value === 1
+              "
+              class="py-3"
+            ></div>
+          </div>
         </div>
+
         <div class="flex items-center justify-between gap-10 w-full">
           <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
+            formControlName="isCheque"
+            [options]="transactionMode"
+            optionLabel="mode"
             placeholder="Transaction Mode"
             [required]="true"
-            [optionValue]="'id'"
+            [optionValue]="'value'"
             class="w-full"
           >
           </p-dropdown>
-          <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
+          <input
+            type="text"
+            pInputText
+            formControlName="amount"
             placeholder="Amount"
             [required]="true"
-            [optionValue]="'id'"
-            class="w-full"
-          >
-          </p-dropdown>
+          />
         </div>
+        <ng-container
+          *ngIf="this.addTransactionForm.get('isCheque')?.value === true"
+        >
+          <div class="flex items-center justify-between gap-10 w-full">
+            <input
+              pInputText
+              formControlName="chequeNumber"
+              placeholder="Cheque Number"
+              [required]="true"
+            />
+            <p-calendar
+              formControlName="poste Date"
+              placeholder="Transaction Date"
+              [readonlyInput]="true"
+              [showIcon]="true"
+              class="w-full"
+            ></p-calendar>
+          </div>
+        </ng-container>
       </form>
 
       <button

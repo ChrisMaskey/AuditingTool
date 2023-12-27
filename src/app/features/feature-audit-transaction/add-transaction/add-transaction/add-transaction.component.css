@@ -21,11 +21,13 @@
 }
 
 :host ::ng-deep .p-dropdown-label.p-inputtext.p-placeholder.ng-star-inserted {
+  font-family: "Inter";
   font-size: 0.75rem !important;
   font-weight: 400;
 }
 
 :host ::ng-deep .p-calendar {
+  font-family: "Inter";
   width: 100%;
 }
 
@@ -53,4 +55,20 @@
 
 :host ::ng-deep calendaricon {
   color: #6c757d;
+}
+
+:host ::ng-deep .p-component {
+  font-family: "Inter" !important;
+  color: #6c757d !important;
+  font-family: "Inter";
+}
+
+/* InputText */
+:host ::ng-deep .p-inputtext {
+  width: 96.5%;
+}
+
+:host ::ng-deep .p-inputtext::placeholder {
+  color: #6c757d !important;
+  font-family: "Inter";
 }

@@ -2,12 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { AuditTransactionFacade } from './audit-transaction.facade';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
+  ADD_TRANSCTIONS,
   FETCH_TRANSACTIONS,
   GET_ACCOUNT_NUMBERS,
   GET_BANKS,
   GET_CLIENTS,
+  GET_COA,
 } from '../../../../interfaces/Urls';
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, map, throwError } from 'rxjs';
 import { Client } from '../entity/client.model';
 import { ApiResponse } from '../../../../interfaces/api-response-interface';
 import { HttpClient } from '@angular/common/http';
@@ -15,6 +17,8 @@ import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
 import { FetchApiResponse } from '../../../../interfaces/fetch-api-response.interface';
 import { FetchTransaction } from '../entity/fetch-transaction.model';
+import { Coa } from '../entity/coa.model';
+import { error } from 'console';
 
 @Injectable()
 export class AuditTransactionService implements AuditTransactionFacade {
@@ -29,15 +33,21 @@ export class AuditTransactionService implements AuditTransactionFacade {
   private accountNumberSubject = new BehaviorSubject<AccountNumber[]>([]);
   accounts$ = this.accountNumberSubject.asObservable();
 
+  private coaSubject = new BehaviorSubject<Coa[]>([]);
+  coa$ = this.coaSubject.asObservable();
+
   private transactionSubject = new BehaviorSubject<FetchTransaction[]>([]);
   transactions$ = this.transactionSubject.asObservable();
 
   private formBuilder = inject(FormBuilder);
   private requiredValidator = Validators.required;
+
   public transactionFilterForm!: FormGroup;
+  public addTransactionForm!: FormGroup;
 
   constructor() {
     this.initTransactionFilterForm();
+    this.initAddTransactionForm();
   }
 
   private initTransactionFilterForm(): void {
@@ -61,9 +71,34 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
+  private initAddTransactionForm(): void {
+    this.addTransactionForm = this.formBuilder.group({
+      statementId: ['729', this.requiredValidator],
+      date: ['', this.requiredValidator],
+      transactionType: ['', this.requiredValidator],
+      tradeType: ['', this.requiredValidator],
+      customerId: ['', this.requiredValidator],
+      employeeId: ['', this.requiredValidator],
+      isEmployee: ['', this.requiredValidator],
+      employeeName: ['', this.requiredValidator],
+      coa: ['', this.requiredValidator],
+      isCheque: ['', this.requiredValidator],
+      chequeNumber: [''],
+      postedDate: [''],
+      amount: [''],
+    });
+  }
+
   public resetForm(): Promise<void> {
     return new Promise((resolve) => {
       this.transactionFilterForm.reset();
+      resolve();
+    });
+  }
+
+  public resetAddForm(): Promise<void> {
+    return new Promise((resolve) => {
+      this.addTransactionForm.reset();
       resolve();
     });
   }
@@ -122,7 +157,25 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
-  fetchTransactions(
+  async getCoa(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      return this.http
+        .get<ApiResponse>(GET_COA)
+        .pipe(map((response: ApiResponse) => response.data as Coa[]))
+        .subscribe({
+          next: (coa: Coa[]) => {
+            this.coaSubject.next(coa);
+            resolve();
+          },
+          error: (error) => {
+            this.coaSubject.next([]);
+            reject(error);
+          },
+        });
+    });
+  }
+
+  async fetchTransactions(
     pageSize: number,
     pageNumber: number
   ): Promise<FetchApiResponse> {
@@ -145,6 +198,13 @@ export class AuditTransactionService implements AuditTransactionFacade {
             reject(error);
           },
         });
+    });
+  }
+
+  async addTransaction(): Promise<void> {
+    const formValue = this.addTransactionForm.value;
+    return new Promise(() => {
+      return this.http.post<ApiResponse>(ADD_TRANSCTIONS, formValue);
     });
   }
 

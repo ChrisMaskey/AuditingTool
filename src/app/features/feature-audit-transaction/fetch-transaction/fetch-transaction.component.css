@@ -30,6 +30,10 @@
   padding: 0.65625rem;
 }
 
+:host ::ng-deep .p-inputtext::placeholder {
+  color: #6c757d !important;
+}
+
 :host ::ng-deep .ng-star-inserted {
   font-size: 0.75rem !important;
   font-weight: 400;
