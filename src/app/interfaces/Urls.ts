@@ -8,6 +8,8 @@ export const GET_BANKS = (clientId: number) =>
 export const GET_ACCOUNT_NUMBERS = (clientId: number, bankName: string) =>
   `${BASE_URL}dropdown/account-number?clientId=${clientId}&bankName=${bankName}`;
 export const GET_COA = BASE_URL + 'dropdown/coa';
+export const GET_CUSTOMER = (customerType: number) =>
+  `${BASE_URL}dropdown/customer-type?customerType=${customerType}`;
 
 // Transaction API URLs
 export const FETCH_TRANSACTIONS = (pageSize: number, pageNumber: number) =>

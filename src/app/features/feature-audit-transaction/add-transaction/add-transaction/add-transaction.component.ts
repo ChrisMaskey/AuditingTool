@@ -39,6 +39,7 @@ export class AddTransactionComponent implements OnInit {
 
   protected addTransactionForm!: FormGroup;
   protected coa$ = this.auditTransactionService.coa$;
+  protected customers$ = this.auditTransactionService.customers$;
 
   @Input() addModalVisible: boolean = false;
   @Output() closeModalEvent = new EventEmitter<void>();
@@ -69,10 +70,34 @@ export class AddTransactionComponent implements OnInit {
         value: true,
       },
     ];
+
+    this.addTransactionForm
+      .get('transactionType')
+      ?.valueChanges.subscribe(() => {
+        if (this.addTransactionForm.get('transactionType')?.value === 0) {
+          this.getCustomers(2);
+        } else if (
+          this.addTransactionForm.get('transactionType')?.value === 1
+        ) {
+          this.addTransactionForm
+            .get('tradeType')
+            ?.valueChanges.subscribe(() => {
+              this.getCustomers(
+                this.addTransactionForm.get('tradeType')?.value
+              );
+            });
+        } else {
+          this.addTransactionForm.get('employeeName')?.setValue('');
+        }
+      });
   }
 
   async getCoa() {
     this.auditTransactionService.getCoa();
+  }
+
+  async getCustomers(customerType: number) {
+    this.auditTransactionService.getCustomers(customerType);
   }
 
   // Output to close modal

@@ -8,6 +8,7 @@ import {
   GET_BANKS,
   GET_CLIENTS,
   GET_COA,
+  GET_CUSTOMER,
 } from '../../../../interfaces/Urls';
 import { BehaviorSubject, map, throwError } from 'rxjs';
 import { Client } from '../entity/client.model';
@@ -19,6 +20,7 @@ import { FetchApiResponse } from '../../../../interfaces/fetch-api-response.inte
 import { FetchTransaction } from '../entity/fetch-transaction.model';
 import { Coa } from '../entity/coa.model';
 import { error } from 'console';
+import { Customer } from '../entity/customer.model';
 
 @Injectable()
 export class AuditTransactionService implements AuditTransactionFacade {
@@ -35,6 +37,9 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   private coaSubject = new BehaviorSubject<Coa[]>([]);
   coa$ = this.coaSubject.asObservable();
+
+  private customerSubject = new BehaviorSubject<Customer[]>([]);
+  customers$ = this.customerSubject.asObservable();
 
   private transactionSubject = new BehaviorSubject<FetchTransaction[]>([]);
   transactions$ = this.transactionSubject.asObservable();
@@ -169,6 +174,24 @@ export class AuditTransactionService implements AuditTransactionFacade {
           },
           error: (error) => {
             this.coaSubject.next([]);
+            reject(error);
+          },
+        });
+    });
+  }
+
+  getCustomers(customerType: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      return this.http
+        .get<ApiResponse>(GET_CUSTOMER(customerType))
+        .pipe(map((response: ApiResponse) => response.data as Customer[]))
+        .subscribe({
+          next: (customer: Customer[]) => {
+            this.customerSubject.next(customer);
+            resolve();
+          },
+          error: (error) => {
+            this.customerSubject.next([]);
             reject(error);
           },
         });

@@ -6,6 +6,7 @@ import { AccountNumber } from '../entity/account-number.model';
 import { FetchTransaction } from '../entity/fetch-transaction.model';
 import { FetchApiResponse } from '../../../../interfaces/fetch-api-response.interface';
 import { Coa } from '../entity/coa.model';
+import { Customer } from '../entity/customer.model';
 
 export abstract class AuditTransactionFacade {
   abstract transactionFilterForm: FormGroup;
@@ -27,6 +28,7 @@ export abstract class AuditTransactionFacade {
   abstract accounts$: Observable<AccountNumber[]>;
   abstract transactions$: Observable<FetchTransaction[]>;
   abstract coa$: Observable<Coa[]>;
+  abstract customers$: Observable<Customer[]>;
 
   /**
    * Retrives all the clients
@@ -44,9 +46,14 @@ export abstract class AuditTransactionFacade {
    */
   abstract getAccounts(clientId: number, bankName: String): Promise<void>;
   /**
-   *
+   *Get Coa
    */
   abstract getCoa(): Promise<void>;
+  /**
+   *
+   * @param customerType is the type of the customer
+   */
+  abstract getCustomers(customerType: number): Promise<void>;
 
   abstract clearBanks(): void;
   abstract clearAccounts(): void;
