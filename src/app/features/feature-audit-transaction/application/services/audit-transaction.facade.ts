@@ -71,4 +71,14 @@ export abstract class AuditTransactionFacade {
    * Adds New Transaction
    */
   abstract addTransaction(): Promise<void>;
+
+  /**
+   * Delete Transaction
+   * @param statementId is the Fetched Statements's Id
+   * @param transactionId is a Particular Transaction's Id
+   */
+  abstract deleteTransaction(
+    statementId: number,
+    transactionId: number
+  ): Promise<void>;
 }

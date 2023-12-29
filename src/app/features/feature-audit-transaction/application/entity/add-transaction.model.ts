@@ -8,5 +8,5 @@ export interface AddTransaction {
   isCheque: boolean;
   chequeNumber: string;
   postedDate: string;
-  amount: string;
+  amount: number;
 }

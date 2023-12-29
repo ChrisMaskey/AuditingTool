@@ -1,8 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { AuditTransactionFacade } from './audit-transaction.facade';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import {
   ADD_TRANSCTIONS,
+  DELETE_TRANSACTIONS,
   FETCH_TRANSACTIONS,
   GET_ACCOUNT_NUMBERS,
   GET_BANKS,
@@ -79,16 +86,16 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   private initAddTransactionForm(): void {
     this.addTransactionForm = this.formBuilder.group({
-      statementId: [729, this.requiredValidator],
+      statementId: ['', this.requiredValidator],
       date: ['', this.requiredValidator],
       transactionType: ['', this.requiredValidator],
       customerId: ['', this.requiredValidator],
       isEmployee: [false, this.requiredValidator],
       coa: ['', this.requiredValidator],
       isCheque: ['', this.requiredValidator],
-      chequeNumber: [''],
-      postedDate: [''],
-      amount: [''],
+      chequeNumber: ['', this.requiredValidator],
+      postedDate: ['', this.requiredValidator],
+      amount: ['', [this.requiredValidator, onlyNumbersValidator()]],
     });
   }
 
@@ -212,6 +219,9 @@ export class AuditTransactionService implements AuditTransactionFacade {
             this.transactionSubject.next(
               response.data.data.transaction as FetchTransaction[]
             );
+            this.addTransactionForm
+              .get('statementId')
+              ?.setValue(response.data.data.statementId);
             resolve(response);
           },
           error: (error) => {
@@ -233,6 +243,26 @@ export class AuditTransactionService implements AuditTransactionFacade {
     }
   }
 
+  async deleteTransaction(
+    statementId: number,
+    transactionId: number
+  ): Promise<void> {
+    const currentStatement: FetchTransaction[] = this.transactionSubject.value;
+
+    statementId = this.addTransactionForm.get('statementId')?.value;
+
+    const getTransactionId = currentStatement.find(
+      (data) => data.id === transactionId
+    );
+    try {
+      this.http.delete<void>(
+        DELETE_TRANSACTIONS(statementId, getTransactionId!.id)
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   clearBanks(): void {
     this.bankSubject.next([]);
   }
@@ -240,4 +270,19 @@ export class AuditTransactionService implements AuditTransactionFacade {
   clearAccounts(): void {
     this.accountNumberSubject.next([]);
   }
+}
+
+export function onlyNumbersValidator(): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } | null => {
+    const value = control.value;
+
+    if (value === null || value === undefined || value === '') {
+      // Allow empty values
+      return null;
+    }
+
+    const isNumber = /^[0-9]*$/.test(value);
+
+    return isNumber ? null : { onlyNumbers: { value: control.value } };
+  };
 }

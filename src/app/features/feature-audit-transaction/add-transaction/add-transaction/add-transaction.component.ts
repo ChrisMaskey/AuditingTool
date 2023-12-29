@@ -10,7 +10,12 @@ import { CalendarModule } from 'primeng/calendar';
 import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { AuditTransactionFacade } from '../../application/services/audit-transaction.facade';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  AbstractControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidatorFn,
+} from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { TransactionType } from '../../application/entity/transaction-type.model';
@@ -52,6 +57,7 @@ export class AddTransactionComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.addTransactionForm = this.auditTransactionService.addTransactionForm;
     this.getCoa();
+
     this.transactionType = [
       {
         type: 'Withdrawal',
@@ -113,9 +119,21 @@ export class AddTransactionComponent implements OnInit {
   }
 
   async addTransaction() {
-    this.formatDate(this.addTransactionForm.get('date')?.value);
-    this.formatPostedDate(this.addTransactionForm.get('postedDate')?.value);
-    await this.auditTransactionService.addTransaction();
+    if (this.addTransactionForm.valid) {
+      this.formatDate(this.addTransactionForm.get('date')?.value);
+      this.formatPostedDate(this.addTransactionForm.get('postedDate')?.value);
+      this.formatAmount(this.addTransactionForm.get('amount')?.value);
+
+      await this.auditTransactionService.addTransaction();
+
+      this.closeModal();
+      this.addTransactionForm.reset;
+    } else {
+      this.addTransactionForm.invalid;
+      Object.values(this.addTransactionForm.controls).forEach((control) => {
+        control.markAsTouched();
+      });
+    }
   }
 
   // Format Date to Day-Month-Year
@@ -127,6 +145,13 @@ export class AddTransactionComponent implements OnInit {
   private formatPostedDate(date: Date | string): void {
     const formattedDate = this.datePipe.transform(date, 'dd-MM-yyyy');
     this.addTransactionForm.get('postedDate')?.setValue(formattedDate);
+  }
+
+  private formatAmount(amount: number): void {
+    const formattedAmount = parseFloat(
+      this.addTransactionForm.get('amount')?.value
+    );
+    this.addTransactionForm.get('amount')?.setValue(formattedAmount);
   }
 
   // Output to close modal

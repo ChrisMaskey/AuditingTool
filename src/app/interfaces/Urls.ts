@@ -17,3 +17,10 @@ export const FETCH_TRANSACTIONS = (pageSize: number, pageNumber: number) =>
 
 // Add Transaction URL
 export const ADD_TRANSCTIONS = BASE_URL + 'transactions/add-transaction';
+
+// Delete Transaction URL
+export const DELETE_TRANSACTIONS = (
+  statementId: number,
+  transactionId: number
+) =>
+  `${BASE_URL}transactions/delete-transaction?statementId=${statementId}&transactionId=${transactionId}`;

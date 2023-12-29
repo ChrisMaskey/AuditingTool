@@ -32,6 +32,11 @@
             [readonlyInput]="true"
             [showIcon]="true"
             class="w-full"
+            [ngClass]="{
+              'ng-dirty ng-invalid':
+                addTransactionForm.get('date')!.invalid &&
+                addTransactionForm.get('date')?.touched
+            }"
           ></p-calendar>
           <p-dropdown
             *ngIf="coa$ | async as coa"
@@ -42,6 +47,11 @@
             [required]="true"
             [optionValue]="'id'"
             class="w-full"
+            [ngClass]="{
+              'ng-dirty ng-invalid':
+                addTransactionForm.get('coa')!.invalid &&
+                addTransactionForm.get('coa')?.touched
+            }"
           >
           </p-dropdown>
         </div>
@@ -56,6 +66,11 @@
               [required]="true"
               [optionValue]="'value'"
               class="w-full"
+              [ngClass]="{
+                'ng-dirty ng-invalid':
+                  addTransactionForm.get('transactionType')!.invalid &&
+                  addTransactionForm.get('transactionType')?.touched
+              }"
             >
             </p-dropdown>
 
@@ -89,6 +104,11 @@
               [optionValue]="'id'"
               [required]="true"
               class="w-full"
+              [ngClass]="{
+                'ng-dirty ng-invalid':
+                  addTransactionForm.get('customerId')!.invalid &&
+                  addTransactionForm.get('customerId')?.touched
+              }"
             >
             </p-dropdown>
             <div
@@ -109,6 +129,11 @@
             [required]="true"
             [optionValue]="'value'"
             class="w-full"
+            [ngClass]="{
+              'ng-dirty ng-invalid':
+                addTransactionForm.get('isCheque')!.invalid &&
+                addTransactionForm.get('isCheque')?.touched
+            }"
           >
           </p-dropdown>
           <input
@@ -117,6 +142,11 @@
             formControlName="amount"
             placeholder="Amount"
             [required]="true"
+            [ngClass]="{
+              'ng-dirty ng-invalid':
+                addTransactionForm.get('amount')!.invalid &&
+                addTransactionForm.get('amount')?.touched
+            }"
           />
         </div>
         <ng-container
@@ -128,6 +158,11 @@
               formControlName="chequeNumber"
               placeholder="Cheque Number"
               [required]="true"
+              [ngClass]="{
+                'ng-dirty ng-invalid':
+                  addTransactionForm.get('chequeNumber')!.invalid &&
+                  addTransactionForm.get('chequeNumber')?.touched
+              }"
             />
             <p-calendar
               formControlName="postedDate"
@@ -135,6 +170,11 @@
               [readonlyInput]="true"
               [showIcon]="true"
               class="w-full"
+              [ngClass]="{
+                'ng-dirty ng-invalid':
+                  addTransactionForm.get('postedDate')!.hasError('required') &&
+                  addTransactionForm.get('postedDate')?.touched
+              }"
             ></p-calendar>
           </div>
         </ng-container>
