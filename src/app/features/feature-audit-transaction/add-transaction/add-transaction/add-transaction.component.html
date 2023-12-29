@@ -40,6 +40,7 @@
             optionLabel="coa"
             placeholder="COA"
             [required]="true"
+            [optionValue]="'id'"
             class="w-full"
           >
           </p-dropdown>
@@ -65,13 +66,13 @@
             >
               <div class="flex items-center justify-between">
                 <p-radioButton
-                  value="3"
-                  formControlName="tradeType"
+                  [value]="true"
+                  formControlName="isEmployee"
                   label="Employee"
                 ></p-radioButton>
                 <p-radioButton
-                  value="1"
-                  formControlName="tradeType"
+                  [value]="false"
+                  formControlName="isEmployee"
                   label="Vendor"
                 ></p-radioButton>
               </div>
@@ -81,10 +82,11 @@
           <div class="flex flex-col gap-5 w-full">
             <p-dropdown
               *ngIf="customers$ | async as customer"
-              formControlName="employeeName"
+              formControlName="customerId"
               [options]="customer"
               optionLabel="name"
               placeholder="Name"
+              [optionValue]="'id'"
               [required]="true"
               class="w-full"
             >
@@ -128,8 +130,8 @@
               [required]="true"
             />
             <p-calendar
-              formControlName="poste Date"
-              placeholder="Transaction Date"
+              formControlName="postedDate"
+              placeholder="Posted Date"
               [readonlyInput]="true"
               [showIcon]="true"
               class="w-full"
@@ -140,10 +142,9 @@
 
       <button
         class="p-[0.625rem] rounded-[0.375rem] bg-[#3B82F6] w-full hover:bg-[#2563EB] active:bg-[#1D4ED8] duration-200"
+        (click)="addTransaction()"
       >
-        <span class="text-sm font-bold leading-[1.05rem] text-white"
-          >Search</span
-        >
+        <span class="text-sm font-bold leading-[1.05rem] text-white">Add</span>
       </button>
     </div>
   </ng-template>

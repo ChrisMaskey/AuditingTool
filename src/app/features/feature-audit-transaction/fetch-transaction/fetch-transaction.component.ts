@@ -52,7 +52,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
 
   isOpen: boolean = false;
   fetchTransaction: boolean | null = false;
-  addModalVisible: boolean = true;
+  addModalVisible: boolean = false;
   pageSize: number = 8;
   pageNumber: number = 1;
   totalCount: number = 0;

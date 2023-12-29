@@ -10,7 +10,7 @@ import {
   GET_COA,
   GET_CUSTOMER,
 } from '../../../../interfaces/Urls';
-import { BehaviorSubject, map, throwError } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { Client } from '../entity/client.model';
 import { ApiResponse } from '../../../../interfaces/api-response-interface';
 import { HttpClient } from '@angular/common/http';
@@ -19,7 +19,6 @@ import { AccountNumber } from '../entity/account-number.model';
 import { FetchApiResponse } from '../../../../interfaces/fetch-api-response.interface';
 import { FetchTransaction } from '../entity/fetch-transaction.model';
 import { Coa } from '../entity/coa.model';
-import { error } from 'console';
 import { Customer } from '../entity/customer.model';
 
 @Injectable()
@@ -50,6 +49,8 @@ export class AuditTransactionService implements AuditTransactionFacade {
   public transactionFilterForm!: FormGroup;
   public addTransactionForm!: FormGroup;
 
+  formControlName: string = '';
+
   constructor() {
     this.initTransactionFilterForm();
     this.initAddTransactionForm();
@@ -78,14 +79,11 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   private initAddTransactionForm(): void {
     this.addTransactionForm = this.formBuilder.group({
-      statementId: ['729', this.requiredValidator],
+      statementId: [729, this.requiredValidator],
       date: ['', this.requiredValidator],
       transactionType: ['', this.requiredValidator],
-      tradeType: ['', this.requiredValidator],
       customerId: ['', this.requiredValidator],
-      employeeId: ['', this.requiredValidator],
-      isEmployee: ['', this.requiredValidator],
-      employeeName: ['', this.requiredValidator],
+      isEmployee: [false, this.requiredValidator],
       coa: ['', this.requiredValidator],
       isCheque: ['', this.requiredValidator],
       chequeNumber: [''],
@@ -212,7 +210,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
         .subscribe({
           next: (response: FetchApiResponse) => {
             this.transactionSubject.next(
-              response.data.data as FetchTransaction[]
+              response.data.data.transaction as FetchTransaction[]
             );
             resolve(response);
           },
@@ -226,9 +224,13 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   async addTransaction(): Promise<void> {
     const formValue = this.addTransactionForm.value;
-    return new Promise(() => {
-      return this.http.post<ApiResponse>(ADD_TRANSCTIONS, formValue);
-    });
+
+    try {
+      await this.http.post<ApiResponse>(ADD_TRANSCTIONS, formValue).toPromise();
+    } catch (error) {
+      // Handle error if needed
+      console.error('Error adding transaction:', error);
+    }
   }
 
   clearBanks(): void {

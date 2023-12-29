@@ -6,7 +6,10 @@ export interface FetchApiResponse {
     totalCount: number;
     pageSize: number;
     pageNumber: number;
-    data: FetchTransaction[];
+    data: {
+      statementId: number;
+      transaction: FetchTransaction[];
+    };
   };
   errors: string[];
 }

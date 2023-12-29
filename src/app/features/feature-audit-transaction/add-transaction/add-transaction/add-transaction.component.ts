@@ -14,7 +14,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { TransactionType } from '../../application/entity/transaction-type.model';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { TransactionMode } from '../../application/entity/transaction-mode.model';
 
 @Component({
@@ -47,6 +47,8 @@ export class AddTransactionComponent implements OnInit {
   transactionType: TransactionType[] = [];
   transactionMode: TransactionMode[] = [];
 
+  constructor(private datePipe: DatePipe) {}
+
   async ngOnInit(): Promise<void> {
     this.addTransactionForm = this.auditTransactionService.addTransactionForm;
     this.getCoa();
@@ -71,33 +73,60 @@ export class AddTransactionComponent implements OnInit {
       },
     ];
 
+    // Get Customer
     this.addTransactionForm
       .get('transactionType')
       ?.valueChanges.subscribe(() => {
         if (this.addTransactionForm.get('transactionType')?.value === 0) {
           this.getCustomers(2);
         } else if (
-          this.addTransactionForm.get('transactionType')?.value === 1
+          this.addTransactionForm.get('transactionType')?.value === 1 &&
+          this.addTransactionForm.get('isEmployee')?.value === true
         ) {
-          this.addTransactionForm
-            .get('tradeType')
-            ?.valueChanges.subscribe(() => {
-              this.getCustomers(
-                this.addTransactionForm.get('tradeType')?.value
-              );
-            });
+          this.getCustomers(3);
+        } else if (
+          this.addTransactionForm.get('transactionType')?.value === 1 &&
+          this.addTransactionForm.get('isEmployee')?.value === false
+        ) {
+          this.getCustomers(1);
         } else {
-          this.addTransactionForm.get('employeeName')?.setValue('');
+          this.addTransactionForm.invalid;
         }
       });
+
+    // Set isEmployee Flag
+    this.addTransactionForm.get('tradeType')?.valueChanges.subscribe(() => {
+      if (this.addTransactionForm.get('tradeType')?.value === 3) {
+        this.addTransactionForm.get('isEmployee')?.setValue(true);
+      } else {
+        this.addTransactionForm.get('isEmployee')?.setValue(false);
+      }
+    });
   }
 
   async getCoa() {
-    this.auditTransactionService.getCoa();
+    await this.auditTransactionService.getCoa();
   }
 
   async getCustomers(customerType: number) {
-    this.auditTransactionService.getCustomers(customerType);
+    await this.auditTransactionService.getCustomers(customerType);
+  }
+
+  async addTransaction() {
+    this.formatDate(this.addTransactionForm.get('date')?.value);
+    this.formatPostedDate(this.addTransactionForm.get('postedDate')?.value);
+    await this.auditTransactionService.addTransaction();
+  }
+
+  // Format Date to Day-Month-Year
+  private formatDate(date: Date | string): void {
+    const formattedDate = this.datePipe.transform(date, 'dd-MM-yyyy');
+    this.addTransactionForm.get('date')?.setValue(formattedDate);
+  }
+
+  private formatPostedDate(date: Date | string): void {
+    const formattedDate = this.datePipe.transform(date, 'dd-MM-yyyy');
+    this.addTransactionForm.get('postedDate')?.setValue(formattedDate);
   }
 
   // Output to close modal
