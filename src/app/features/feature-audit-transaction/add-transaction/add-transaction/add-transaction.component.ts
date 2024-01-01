@@ -79,35 +79,34 @@ export class AddTransactionComponent implements OnInit {
       },
     ];
 
-    // Get Customer
     this.addTransactionForm
       .get('transactionType')
-      ?.valueChanges.subscribe(() => {
-        if (this.addTransactionForm.get('transactionType')?.value === 0) {
-          this.getCustomers(2);
-        } else if (
-          this.addTransactionForm.get('transactionType')?.value === 1 &&
-          this.addTransactionForm.get('isEmployee')?.value === true
-        ) {
+      ?.valueChanges.subscribe((value) => {
+        const isEmployee = this.addTransactionForm.get('isEmployee')?.value;
+
+        if (isEmployee && value === 1) {
           this.getCustomers(3);
-        } else if (
-          this.addTransactionForm.get('transactionType')?.value === 1 &&
-          this.addTransactionForm.get('isEmployee')?.value === false
-        ) {
+        } else if (!isEmployee && value === 1) {
           this.getCustomers(1);
         } else {
-          this.addTransactionForm.invalid;
+          this.getCustomers(2);
         }
       });
 
-    // Set isEmployee Flag
-    this.addTransactionForm.get('tradeType')?.valueChanges.subscribe(() => {
-      if (this.addTransactionForm.get('tradeType')?.value === 3) {
-        this.addTransactionForm.get('isEmployee')?.setValue(true);
-      } else {
-        this.addTransactionForm.get('isEmployee')?.setValue(false);
-      }
-    });
+    this.addTransactionForm
+      .get('isEmployee')
+      ?.valueChanges.subscribe((isEmployee) => {
+        const transactionType =
+          this.addTransactionForm.get('transactionType')?.value;
+
+        if (isEmployee && transactionType === 1) {
+          this.getCustomers(3);
+        } else if (!isEmployee && transactionType === 1) {
+          this.getCustomers(1);
+        } else {
+          this.getCustomers(2);
+        }
+      });
   }
 
   async getCoa() {
@@ -119,31 +118,31 @@ export class AddTransactionComponent implements OnInit {
   }
 
   async addTransaction() {
-    if (this.addTransactionForm.valid) {
-      this.formatDate(this.addTransactionForm.get('date')?.value);
-      this.formatPostedDate(this.addTransactionForm.get('postedDate')?.value);
-      this.formatAmount(this.addTransactionForm.get('amount')?.value);
+    this.formatDate(this.addTransactionForm.get('date')?.value);
+    this.formatPostedDate(this.addTransactionForm.get('postedDate')?.value);
+    this.formatAmount(this.addTransactionForm.get('amount')?.value);
 
+    try {
       await this.auditTransactionService.addTransaction();
-
       this.closeModal();
       this.addTransactionForm.reset;
-    } else {
+    } catch (error) {
       this.addTransactionForm.invalid;
       Object.values(this.addTransactionForm.controls).forEach((control) => {
         control.markAsTouched();
       });
+      console.log(error);
     }
   }
 
   // Format Date to Day-Month-Year
   private formatDate(date: Date | string): void {
-    const formattedDate = this.datePipe.transform(date, 'dd-MM-yyyy');
+    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
     this.addTransactionForm.get('date')?.setValue(formattedDate);
   }
 
   private formatPostedDate(date: Date | string): void {
-    const formattedDate = this.datePipe.transform(date, 'dd-MM-yyyy');
+    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
     this.addTransactionForm.get('postedDate')?.setValue(formattedDate);
   }
 

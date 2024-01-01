@@ -192,6 +192,7 @@
               </div>
               <div
                 class="flex items-center justify-center py-[0.218rem] px-[0.35rem] bg-[#EF4444] rounded-[0.25rem] cursor-pointer"
+                (click)="confirm1(transaction.id, $event)"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -385,3 +386,6 @@
   [addModalVisible]="addModalVisible"
   (closeModalEvent)="closeAddDialog()"
 ></app-add-transaction>
+
+<p-toast></p-toast>
+<p-confirmDialog id="deleteModal"></p-confirmDialog>

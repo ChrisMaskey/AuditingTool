@@ -243,23 +243,19 @@ export class AuditTransactionService implements AuditTransactionFacade {
     }
   }
 
-  async deleteTransaction(
-    statementId: number,
-    transactionId: number
-  ): Promise<void> {
-    const currentStatement: FetchTransaction[] = this.transactionSubject.value;
-
-    statementId = this.addTransactionForm.get('statementId')?.value;
-
-    const getTransactionId = currentStatement.find(
-      (data) => data.id === transactionId
-    );
+  async deleteTransaction(transactionId: number): Promise<void> {
     try {
-      this.http.delete<void>(
-        DELETE_TRANSACTIONS(statementId, getTransactionId!.id)
-      );
+      const statementId = this.addTransactionForm.get('statementId')?.value;
+
+      if (statementId !== undefined) {
+        await this.http
+          .delete<void>(DELETE_TRANSACTIONS(statementId, transactionId))
+          .toPromise();
+      } else {
+        console.warn('Statement ID is undefined.');
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error deleting transaction:', error);
     }
   }
 
