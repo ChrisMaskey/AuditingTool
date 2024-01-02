@@ -21,7 +21,10 @@
       >
         Add new transaction
       </h2>
-      <form class="flex flex-col items-start justify-center gap-5 w-full">
+      <form
+        [formGroup]="addTransactionForm"
+        class="flex flex-col items-start justify-center gap-5 w-full"
+      >
         <div class="flex items-center justify-between gap-10 w-full">
           <p-calendar
             formControlName="date"
@@ -29,70 +32,159 @@
             [readonlyInput]="true"
             [showIcon]="true"
             class="w-full"
+            [ngClass]="{
+              'ng-dirty ng-invalid':
+                addTransactionForm.get('date')!.invalid &&
+                addTransactionForm.get('date')?.touched
+            }"
           ></p-calendar>
           <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
-            placeholder="Client Name*"
+            *ngIf="coa$ | async as coa"
+            formControlName="coa"
+            [options]="coa"
+            optionLabel="coa"
+            placeholder="COA"
             [required]="true"
             [optionValue]="'id'"
             class="w-full"
+            [ngClass]="{
+              'ng-dirty ng-invalid':
+                addTransactionForm.get('coa')!.invalid &&
+                addTransactionForm.get('coa')?.touched
+            }"
           >
           </p-dropdown>
         </div>
+
         <div class="flex items-center justify-between gap-10 w-full">
-          <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
-            placeholder="Transaction Type"
-            [required]="true"
-            [optionValue]="'id'"
-            class="w-full"
-          >
-          </p-dropdown>
-          <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
-            placeholder="Name"
-            [required]="true"
-            [optionValue]="'id'"
-            class="w-full"
-          >
-          </p-dropdown>
+          <div class="flex flex-col gap-5 w-full">
+            <p-dropdown
+              formControlName="transactionType"
+              [options]="transactionType"
+              optionLabel="type"
+              placeholder="Transaction Type"
+              [required]="true"
+              [optionValue]="'value'"
+              class="w-full"
+              [ngClass]="{
+                'ng-dirty ng-invalid':
+                  addTransactionForm.get('transactionType')!.invalid &&
+                  addTransactionForm.get('transactionType')?.touched
+              }"
+            >
+            </p-dropdown>
+
+            <ng-container
+              *ngIf="
+                this.addTransactionForm.get('transactionType')?.value === 1
+              "
+            >
+              <div class="flex items-center justify-between">
+                <p-radioButton
+                  [value]="true"
+                  formControlName="isEmployee"
+                  label="Employee"
+                ></p-radioButton>
+                <p-radioButton
+                  [value]="false"
+                  formControlName="isEmployee"
+                  label="Vendor"
+                ></p-radioButton>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="flex flex-col gap-5 w-full">
+            <p-dropdown
+              *ngIf="customers$ | async as customer"
+              formControlName="customerId"
+              [options]="customer"
+              optionLabel="name"
+              placeholder="Name"
+              [optionValue]="'id'"
+              [required]="true"
+              class="w-full"
+              [ngClass]="{
+                'ng-dirty ng-invalid':
+                  addTransactionForm.get('customerId')!.invalid &&
+                  addTransactionForm.get('customerId')?.touched
+              }"
+            >
+            </p-dropdown>
+            <div
+              *ngIf="
+                this.addTransactionForm.get('transactionType')?.value === 1
+              "
+              class="py-3"
+            ></div>
+          </div>
         </div>
+
         <div class="flex items-center justify-between gap-10 w-full">
           <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
+            formControlName="isCheque"
+            [options]="transactionMode"
+            optionLabel="mode"
             placeholder="Transaction Mode"
             [required]="true"
-            [optionValue]="'id'"
+            [optionValue]="'value'"
             class="w-full"
+            [ngClass]="{
+              'ng-dirty ng-invalid':
+                addTransactionForm.get('isCheque')!.invalid &&
+                addTransactionForm.get('isCheque')?.touched
+            }"
           >
           </p-dropdown>
-          <p-dropdown
-            formControlName=""
-            [options]=""
-            optionLabel="legalName"
+          <input
+            type="text"
+            pInputText
+            formControlName="amount"
             placeholder="Amount"
             [required]="true"
-            [optionValue]="'id'"
-            class="w-full"
-          >
-          </p-dropdown>
+            [ngClass]="{
+              'ng-dirty ng-invalid':
+                addTransactionForm.get('amount')!.invalid &&
+                addTransactionForm.get('amount')?.touched
+            }"
+          />
         </div>
+        <ng-container
+          *ngIf="this.addTransactionForm.get('isCheque')?.value === true"
+        >
+          <div class="flex items-center justify-between gap-10 w-full">
+            <input
+              pInputText
+              formControlName="chequeNumber"
+              placeholder="Cheque Number"
+              [required]="true"
+              [ngClass]="{
+                'ng-dirty ng-invalid':
+                  addTransactionForm.get('chequeNumber')!.invalid &&
+                  addTransactionForm.get('chequeNumber')?.touched
+              }"
+            />
+            <p-calendar
+              formControlName="postedDate"
+              placeholder="Posted Date"
+              [readonlyInput]="true"
+              [showIcon]="true"
+              class="w-full"
+              [ngClass]="{
+                'ng-dirty ng-invalid':
+                  addTransactionForm.get('postedDate')!.hasError('required') &&
+                  addTransactionForm.get('postedDate')?.touched
+              }"
+            ></p-calendar>
+          </div>
+        </ng-container>
       </form>
 
       <button
         class="p-[0.625rem] rounded-[0.375rem] bg-[#3B82F6] w-full hover:bg-[#2563EB] active:bg-[#1D4ED8] duration-200"
+        (click)="addTransaction()"
       >
-        <span class="text-sm font-bold leading-[1.05rem] text-white"
-          >Search</span
-        >
+        <span class="text-sm font-bold leading-[1.05rem] text-white">Add</span>
       </button>
     </div>
   </ng-template>

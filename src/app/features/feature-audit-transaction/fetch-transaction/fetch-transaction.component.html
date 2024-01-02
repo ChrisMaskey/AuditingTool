@@ -83,7 +83,9 @@
           </clipPath>
         </defs>
       </svg>
-      <h3 class="text-sm font-bold leading-[1.05rem]">Add Transaction</h3>
+      <h3 class="font-sans text-sm font-bold leading-[1.05rem]">
+        Add Transaction
+      </h3>
     </p-button>
   </div>
 
@@ -190,6 +192,7 @@
               </div>
               <div
                 class="flex items-center justify-center py-[0.218rem] px-[0.35rem] bg-[#EF4444] rounded-[0.25rem] cursor-pointer"
+                (click)="confirm1(transaction.id, $event)"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -363,6 +366,7 @@
           placeholder="Month-Year"
           [readonlyInput]="true"
           [showIcon]="true"
+          class="placeholder:text-[#6C757D]"
         ></p-calendar>
       </form>
 
@@ -382,3 +386,6 @@
   [addModalVisible]="addModalVisible"
   (closeModalEvent)="closeAddDialog()"
 ></app-add-transaction>
+
+<p-toast></p-toast>
+<p-confirmDialog id="deleteModal"></p-confirmDialog>

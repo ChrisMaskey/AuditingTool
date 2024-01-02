@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   HostListener,
-  Input,
   OnDestroy,
   OnInit,
   inject,
@@ -16,8 +15,11 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { PaginatorModule } from 'primeng/paginator';
 import { DialogModule } from 'primeng/dialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { AddTransactionComponent } from '../add-transaction/add-transaction/add-transaction.component';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-fetch-transaction',
@@ -33,8 +35,10 @@ import { AddTransactionComponent } from '../add-transaction/add-transaction/add-
     TagModule,
     PaginatorModule,
     DialogModule,
+    ConfirmDialogModule,
+    ToastModule,
   ],
-  providers: [DatePipe],
+  providers: [DatePipe, ConfirmationService, MessageService],
   templateUrl: './fetch-transaction.component.html',
   styleUrl: './fetch-transaction.component.css',
 })
@@ -60,7 +64,11 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   private bankSubscription: Subscription | undefined = new Subscription();
   private accountSubscription: Subscription | undefined = new Subscription();
 
-  constructor(private datePipe: DatePipe) {}
+  constructor(
+    private datePipe: DatePipe,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService
+  ) {}
 
   async ngOnInit(): Promise<void> {
     // Initialize the form
@@ -95,6 +103,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.accountSubscription?.unsubscribe();
   }
 
+  // Fetch Transactions
   async fetchTransactions() {
     if (this.transactionFilterForm.valid) {
       this.formatDate(this.transactionFilterForm.get('date')?.value);
@@ -120,6 +129,13 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Delete Transaction
+  async deleteTransaction(transactionId: number) {
+    this.auditTransactionService.deleteTransaction(transactionId).then(() => {
+      this.fetchTransactions();
+    });
+  }
+
   onPageChange(event: any) {
     this.pageNumber = event.page + 1;
     this.fetchTransactions();
@@ -129,6 +145,27 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.auditTransactionService.resetForm().then(() => {
       this.fetchTransaction = false;
     });
+  }
+
+  // Format Date to MM-YYYY
+  private formatDate(date: Date | string): void {
+    if (typeof date === 'string') {
+      const [month, year] = date.split('-');
+      date = new Date(+year, +month - 1); // Months are zero-based
+    }
+
+    const formattedDate = this.datePipe.transform(date, 'MM/yyyy');
+    this.transactionFilterForm.get('date')?.setValue(formattedDate);
+  }
+
+  // Format Amount
+  formatAmount(amount: number): string {
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+
+    return formattedAmount;
   }
 
   // Toggle Search Dropdown
@@ -183,6 +220,29 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     }
   }
 
+  confirm1(transactionId: number, event: Event) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: 'Are you sure that you want to delete this?',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: 'none',
+      rejectIcon: 'none',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Transaction deleted',
+        });
+        try {
+          this.deleteTransaction(transactionId);
+        } catch (error) {
+          console.log(error);
+        }
+      },
+    });
+  }
+
   // Paginator Page Index
   calculateStartIndex() {
     return (this.pageNumber - 1) * this.pageSize + 1;
@@ -191,27 +251,6 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   calculateEndIndex() {
     const endIndex = this.pageNumber * this.pageSize;
     return endIndex > this.totalCount ? this.totalCount : endIndex;
-  }
-
-  // Format Amount
-  formatAmount(amount: number): string {
-    const formattedAmount = new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-
-    return formattedAmount;
-  }
-
-  // Format Date to MM-YYYY
-  private formatDate(date: Date | string): void {
-    if (typeof date === 'string') {
-      const [month, year] = date.split('-');
-      date = new Date(+year, +month - 1); // Months are zero-based
-    }
-
-    const formattedDate = this.datePipe.transform(date, 'MM-yyyy');
-    this.transactionFilterForm.get('date')?.setValue(formattedDate);
   }
 
   @HostListener('document:click', ['$event'])

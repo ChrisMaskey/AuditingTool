@@ -1,11 +1,21 @@
 import { Injectable, inject } from '@angular/core';
 import { AuditTransactionFacade } from './audit-transaction.facade';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
+import {
+  ADD_TRANSCTIONS,
+  DELETE_TRANSACTIONS,
   FETCH_TRANSACTIONS,
   GET_ACCOUNT_NUMBERS,
   GET_BANKS,
   GET_CLIENTS,
+  GET_COA,
+  GET_CUSTOMER,
 } from '../../../../interfaces/Urls';
 import { BehaviorSubject, map } from 'rxjs';
 import { Client } from '../entity/client.model';
@@ -15,6 +25,8 @@ import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
 import { FetchApiResponse } from '../../../../interfaces/fetch-api-response.interface';
 import { FetchTransaction } from '../entity/fetch-transaction.model';
+import { Coa } from '../entity/coa.model';
+import { Customer } from '../entity/customer.model';
 
 @Injectable()
 export class AuditTransactionService implements AuditTransactionFacade {
@@ -29,15 +41,26 @@ export class AuditTransactionService implements AuditTransactionFacade {
   private accountNumberSubject = new BehaviorSubject<AccountNumber[]>([]);
   accounts$ = this.accountNumberSubject.asObservable();
 
+  private coaSubject = new BehaviorSubject<Coa[]>([]);
+  coa$ = this.coaSubject.asObservable();
+
+  private customerSubject = new BehaviorSubject<Customer[]>([]);
+  customers$ = this.customerSubject.asObservable();
+
   private transactionSubject = new BehaviorSubject<FetchTransaction[]>([]);
   transactions$ = this.transactionSubject.asObservable();
 
   private formBuilder = inject(FormBuilder);
   private requiredValidator = Validators.required;
+
   public transactionFilterForm!: FormGroup;
+  public addTransactionForm!: FormGroup;
+
+  formControlName: string = '';
 
   constructor() {
     this.initTransactionFilterForm();
+    this.initAddTransactionForm();
   }
 
   private initTransactionFilterForm(): void {
@@ -61,9 +84,31 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
+  private initAddTransactionForm(): void {
+    this.addTransactionForm = this.formBuilder.group({
+      statementId: ['', this.requiredValidator],
+      date: ['', this.requiredValidator],
+      transactionType: ['', this.requiredValidator],
+      customerId: ['', this.requiredValidator],
+      isEmployee: [false, this.requiredValidator],
+      coa: ['', this.requiredValidator],
+      isCheque: ['', this.requiredValidator],
+      chequeNumber: ['', this.requiredValidator],
+      postedDate: ['', this.requiredValidator],
+      amount: ['', [this.requiredValidator, onlyNumbersValidator()]],
+    });
+  }
+
   public resetForm(): Promise<void> {
     return new Promise((resolve) => {
       this.transactionFilterForm.reset();
+      resolve();
+    });
+  }
+
+  public resetAddForm(): Promise<void> {
+    return new Promise((resolve) => {
+      this.addTransactionForm.reset();
       resolve();
     });
   }
@@ -122,7 +167,43 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
-  fetchTransactions(
+  async getCoa(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      return this.http
+        .get<ApiResponse>(GET_COA)
+        .pipe(map((response: ApiResponse) => response.data as Coa[]))
+        .subscribe({
+          next: (coa: Coa[]) => {
+            this.coaSubject.next(coa);
+            resolve();
+          },
+          error: (error) => {
+            this.coaSubject.next([]);
+            reject(error);
+          },
+        });
+    });
+  }
+
+  getCustomers(customerType: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      return this.http
+        .get<ApiResponse>(GET_CUSTOMER(customerType))
+        .pipe(map((response: ApiResponse) => response.data as Customer[]))
+        .subscribe({
+          next: (customer: Customer[]) => {
+            this.customerSubject.next(customer);
+            resolve();
+          },
+          error: (error) => {
+            this.customerSubject.next([]);
+            reject(error);
+          },
+        });
+    });
+  }
+
+  async fetchTransactions(
     pageSize: number,
     pageNumber: number
   ): Promise<FetchApiResponse> {
@@ -136,8 +217,11 @@ export class AuditTransactionService implements AuditTransactionFacade {
         .subscribe({
           next: (response: FetchApiResponse) => {
             this.transactionSubject.next(
-              response.data.data as FetchTransaction[]
+              response.data.data.transaction as FetchTransaction[]
             );
+            this.addTransactionForm
+              .get('statementId')
+              ?.setValue(response.data.data.statementId);
             resolve(response);
           },
           error: (error) => {
@@ -148,6 +232,33 @@ export class AuditTransactionService implements AuditTransactionFacade {
     });
   }
 
+  async addTransaction(): Promise<void> {
+    const formValue = this.addTransactionForm.value;
+
+    try {
+      await this.http.post<ApiResponse>(ADD_TRANSCTIONS, formValue).toPromise();
+    } catch (error) {
+      // Handle error if needed
+      console.error('Error adding transaction:', error);
+    }
+  }
+
+  async deleteTransaction(transactionId: number): Promise<void> {
+    try {
+      const statementId = this.addTransactionForm.get('statementId')?.value;
+
+      if (statementId !== undefined) {
+        await this.http
+          .delete<void>(DELETE_TRANSACTIONS(statementId, transactionId))
+          .toPromise();
+      } else {
+        console.warn('Statement ID is undefined.');
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+    }
+  }
+
   clearBanks(): void {
     this.bankSubject.next([]);
   }
@@ -155,4 +266,19 @@ export class AuditTransactionService implements AuditTransactionFacade {
   clearAccounts(): void {
     this.accountNumberSubject.next([]);
   }
+}
+
+export function onlyNumbersValidator(): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } | null => {
+    const value = control.value;
+
+    if (value === null || value === undefined || value === '') {
+      // Allow empty values
+      return null;
+    }
+
+    const isNumber = /^[0-9]*$/.test(value);
+
+    return isNumber ? null : { onlyNumbers: { value: control.value } };
+  };
 }
