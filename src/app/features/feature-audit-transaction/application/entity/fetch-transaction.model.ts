@@ -10,4 +10,6 @@ export interface FetchTransaction {
   postedDate: string;
   amount: number;
   tradeType: string;
+  isCheque: boolean;
+  customerId: number;
 }

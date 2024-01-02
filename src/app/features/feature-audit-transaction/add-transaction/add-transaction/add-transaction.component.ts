@@ -10,17 +10,14 @@ import { CalendarModule } from 'primeng/calendar';
 import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { AuditTransactionFacade } from '../../application/services/audit-transaction.facade';
-import {
-  AbstractControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidatorFn,
-} from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { ToastModule } from 'primeng/toast';
 import { TransactionType } from '../../application/entity/transaction-type.model';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TransactionMode } from '../../application/entity/transaction-mode.model';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-add-transaction',
@@ -33,7 +30,9 @@ import { TransactionMode } from '../../application/entity/transaction-mode.model
     InputTextModule,
     ReactiveFormsModule,
     RadioButtonModule,
+    ToastModule,
   ],
+  providers: [DatePipe, MessageService],
   templateUrl: './add-transaction.component.html',
   styleUrl: './add-transaction.component.css',
 })
@@ -52,7 +51,10 @@ export class AddTransactionComponent implements OnInit {
   transactionType: TransactionType[] = [];
   transactionMode: TransactionMode[] = [];
 
-  constructor(private datePipe: DatePipe) {}
+  constructor(
+    private datePipe: DatePipe,
+    private messageService: MessageService
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.addTransactionForm = this.auditTransactionService.addTransactionForm;
@@ -123,15 +125,29 @@ export class AddTransactionComponent implements OnInit {
     this.formatAmount(this.addTransactionForm.get('amount')?.value);
 
     try {
-      await this.auditTransactionService.addTransaction();
-      this.closeModal();
-      this.addTransactionForm.reset;
+      if (this.addTransactionForm.valid) {
+        await this.auditTransactionService.addTransaction().then(() => {
+          this.closeModal();
+          this.addTransactionForm.reset;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Transaction Added',
+          });
+        });
+      } else {
+        this.addTransactionForm.invalid;
+        Object.values(this.addTransactionForm.controls).forEach((control) => {
+          control.markAsTouched();
+        });
+      }
     } catch (error) {
-      this.addTransactionForm.invalid;
-      Object.values(this.addTransactionForm.controls).forEach((control) => {
-        control.markAsTouched();
-      });
       console.log(error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to add transaction',
+      });
     }
   }
 

@@ -11,6 +11,7 @@ import { Customer } from '../entity/customer.model';
 export abstract class AuditTransactionFacade {
   abstract transactionFilterForm: FormGroup;
   abstract addTransactionForm: FormGroup;
+  abstract editTransactionForm: FormGroup;
 
   /**
    * Resets the Transaction Filter Form
@@ -77,4 +78,9 @@ export abstract class AuditTransactionFacade {
    * @param transactionId is a Particular Transaction's Id
    */
   abstract deleteTransaction(transactionId: number): Promise<void>;
+
+  /**
+   * Edit Tranasction
+   */
+  abstract editTransaction(): Promise<void>;
 }

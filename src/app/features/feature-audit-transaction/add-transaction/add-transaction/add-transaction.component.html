@@ -1,8 +1,9 @@
 <!-- Add Transaction Modal -->
+<p-toast></p-toast>
 <p-dialog
   [(visible)]="addModalVisible"
   [modal]="true"
-  [style]="{ width: '50vw' }"
+  [style]="{ width: '50%' }"
   [draggable]="false"
   [resizable]="false"
 >
@@ -32,6 +33,7 @@
             [readonlyInput]="true"
             [showIcon]="true"
             class="w-full"
+            appendTo="body"
             [ngClass]="{
               'ng-dirty ng-invalid':
                 addTransactionForm.get('date')!.invalid &&
@@ -170,6 +172,7 @@
               [readonlyInput]="true"
               [showIcon]="true"
               class="w-full"
+              appendTo="body"
               [ngClass]="{
                 'ng-dirty ng-invalid':
                   addTransactionForm.get('postedDate')!.hasError('required') &&
