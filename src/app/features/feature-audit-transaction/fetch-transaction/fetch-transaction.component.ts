@@ -27,6 +27,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { FetchTransaction } from '../application/entity/fetch-transaction.model';
 import { ApiResponse } from '../../../interfaces/api-response-interface';
 import { FetchApiResponse } from '../../../interfaces/fetch-api-response.interface';
+import { Observable, map } from 'rxjs';
 
 @Component({
   selector: 'app-fetch-transaction',
@@ -206,8 +207,12 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
 
   // Edit Tranasaction
   async editTransaction() {
+    this.formatEditDate(this.editTransactionForm.get('date')?.value);
+    this.formatPostedDate(this.editTransactionForm.get('postedDate')?.value);
+
     this.auditTransactionService.editTransaction().then(() => {
       this.fetchTransactions();
+      this.closeEditDialog();
     });
   }
 
@@ -227,7 +232,9 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   }
 
   resetForm() {
-    this.auditTransactionService.resetForm().then(() => {});
+    this.auditTransactionService.resetForm().then(() => {
+      this.fetchTransaction = false;
+    });
   }
 
   private formatDate(date: Date | string): void {
@@ -250,6 +257,16 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
 
     const formattedDate = this.datePipe.transform(parsedDate, 'MM/yyyy');
     this.transactionFilterForm.get('date')?.setValue(formattedDate);
+  }
+
+  private formatEditDate(date: Date | string): void {
+    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
+    this.editTransactionForm.get('date')?.setValue(formattedDate);
+  }
+
+  private formatPostedDate(date: Date | string): void {
+    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
+    this.editTransactionForm.get('postedDate')?.setValue(formattedDate);
   }
 
   // Format Amount
@@ -280,13 +297,25 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.addModalVisible = false;
   }
 
+  getCoaId(name: string): Observable<number | null> {
+    return this.coa$.pipe(
+      map((coa) => {
+        const selectedCoa = coa.find((coa) => coa.coa === name);
+        return selectedCoa ? selectedCoa.id : null;
+      })
+    );
+  }
+
   // Toggle Edit Transaction Dropdown
   openEditDialog(transaction: FetchTransaction) {
+    this.getCoaId(transaction.coa).subscribe((id) => {
+      this.editTransactionForm.get('coa')?.patchValue(id);
+    });
     this.editTransactionForm.patchValue({
       transactionId: transaction.id,
       date: transaction.date,
-      coa: transaction.coa,
-      transactionType: transaction.transactionType,
+      // coa: transaction.coa,
+      transactionType: transaction.transactionType === 'Deposit' ? 0 : 1,
       isEmployee: transaction.isEmployee,
       customerId: transaction.customerId,
       isCheque: transaction.isCheque,
@@ -294,10 +323,6 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
       chequeNumber: transaction.chequeNumber,
       postedDate: transaction.postedDate,
     });
-    console.log(this.editTransactionForm.get('coa')?.value);
-
-    console.log(this.editTransactionForm.value);
-
     this.editModalVisible = true;
   }
 

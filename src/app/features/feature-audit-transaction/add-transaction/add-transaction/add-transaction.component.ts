@@ -83,32 +83,13 @@ export class AddTransactionComponent implements OnInit {
 
     this.addTransactionForm
       .get('transactionType')
-      ?.valueChanges.subscribe((value) => {
-        const isEmployee = this.addTransactionForm.get('isEmployee')?.value;
-
-        if (isEmployee && value === 1) {
-          this.getCustomers(3);
-        } else if (!isEmployee && value === 1) {
-          this.getCustomers(1);
-        } else {
-          this.getCustomers(2);
-        }
+      ?.valueChanges.subscribe(() => {
+        this.handleFormChanges();
       });
 
-    this.addTransactionForm
-      .get('isEmployee')
-      ?.valueChanges.subscribe((isEmployee) => {
-        const transactionType =
-          this.addTransactionForm.get('transactionType')?.value;
-
-        if (isEmployee && transactionType === 1) {
-          this.getCustomers(3);
-        } else if (!isEmployee && transactionType === 1) {
-          this.getCustomers(1);
-        } else {
-          this.getCustomers(2);
-        }
-      });
+    this.addTransactionForm.get('isEmployee')?.valueChanges.subscribe(() => {
+      this.handleFormChanges();
+    });
   }
 
   async getCoa() {
@@ -123,24 +104,21 @@ export class AddTransactionComponent implements OnInit {
     this.formatDate(this.addTransactionForm.get('date')?.value);
     this.formatPostedDate(this.addTransactionForm.get('postedDate')?.value);
     this.formatAmount(this.addTransactionForm.get('amount')?.value);
-
     try {
-      if (this.addTransactionForm.valid) {
-        await this.auditTransactionService.addTransaction().then(() => {
-          this.closeModal();
-          this.addTransactionForm.reset;
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Transaction Added',
-          });
+      await this.auditTransactionService.addTransaction().then(() => {
+        this.closeModal();
+        this.addTransactionForm.reset;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Transaction Added',
         });
-      } else {
-        this.addTransactionForm.invalid;
-        Object.values(this.addTransactionForm.controls).forEach((control) => {
-          control.markAsTouched();
-        });
-      }
+      });
+
+      this.addTransactionForm.invalid;
+      Object.values(this.addTransactionForm.controls).forEach((control) => {
+        control.markAsTouched();
+      });
     } catch (error) {
       console.log(error);
       this.messageService.add({
@@ -173,4 +151,18 @@ export class AddTransactionComponent implements OnInit {
   closeModal() {
     this.closeModalEvent.emit();
   }
+
+  // Handle value changes
+  handleFormChanges = () => {
+    const transactionType =
+      this.addTransactionForm.get('transactionType')?.value;
+    const isEmployee = this.addTransactionForm.get('isEmployee')?.value;
+    if (isEmployee && transactionType === 1) {
+      this.getCustomers(3);
+    } else if (!isEmployee && transactionType === 1) {
+      this.getCustomers(1);
+    } else {
+      this.getCustomers(2);
+    }
+  };
 }
