@@ -105,20 +105,22 @@ export class AddTransactionComponent implements OnInit {
     this.formatPostedDate(this.addTransactionForm.get('postedDate')?.value);
     this.formatAmount(this.addTransactionForm.get('amount')?.value);
     try {
-      await this.auditTransactionService.addTransaction().then(() => {
-        this.closeModal();
-        this.addTransactionForm.reset;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Transaction Added',
+      if (this.addTransactionForm.valid) {
+        await this.auditTransactionService.addTransaction().then(() => {
+          this.closeModal();
+          this.addTransactionForm.reset;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Transaction Added',
+          });
         });
-      });
-
-      this.addTransactionForm.invalid;
-      Object.values(this.addTransactionForm.controls).forEach((control) => {
-        control.markAsTouched();
-      });
+      } else {
+        this.addTransactionForm.invalid;
+        Object.values(this.addTransactionForm.controls).forEach((control) => {
+          control.markAsTouched();
+        });
+      }
     } catch (error) {
       console.log(error);
       this.messageService.add({
@@ -150,6 +152,7 @@ export class AddTransactionComponent implements OnInit {
   // Output to close modal
   closeModal() {
     this.closeModalEvent.emit();
+    this.addTransactionForm.reset();
   }
 
   // Handle value changes
