@@ -148,3 +148,26 @@
 :host ::ng-deep .p-confirm-dialog-message.ng-tns-c3410224651-1 {
   @apply m-0;
 }
+
+/* PrimeNg Modal */
+:host ::ng-deep .p-dialog-header {
+  display: none;
+}
+
+:host ::ng-deep .p-dialog.p-component {
+  @apply rounded-[1.25rem];
+}
+
+:host ::ng-deep .ng-tns-c4042076560-2.p-dialog-content {
+  @apply rounded-[1.25rem] pt-[1.875rem] pb-[3.125rem] px-[6.25rem] !important;
+}
+
+/* InputText */
+:host ::ng-deep .p-inputtext {
+  width: 96.5%;
+}
+
+:host ::ng-deep .p-inputtext::placeholder {
+  color: #6c757d !important;
+  font-family: "Inter";
+}

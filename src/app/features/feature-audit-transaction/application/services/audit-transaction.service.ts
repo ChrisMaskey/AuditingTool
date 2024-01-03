@@ -10,6 +10,7 @@ import {
 import {
   ADD_TRANSCTIONS,
   DELETE_TRANSACTIONS,
+  EDIT_TRANSACTIONS,
   FETCH_TRANSACTIONS,
   GET_ACCOUNT_NUMBERS,
   GET_BANKS,
@@ -55,12 +56,14 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   public transactionFilterForm!: FormGroup;
   public addTransactionForm!: FormGroup;
+  public editTransactionForm!: FormGroup;
 
   formControlName: string = '';
 
   constructor() {
     this.initTransactionFilterForm();
     this.initAddTransactionForm();
+    this.initEditTransactionForm();
   }
 
   private initTransactionFilterForm(): void {
@@ -97,6 +100,75 @@ export class AuditTransactionService implements AuditTransactionFacade {
       postedDate: ['', this.requiredValidator],
       amount: ['', [this.requiredValidator, onlyNumbersValidator()]],
     });
+
+    // Add conditional validators for chequeNumber, postedDate, and amount
+    const chequeNumberControl = this.addTransactionForm.get('chequeNumber');
+    const postedDateControl = this.addTransactionForm.get('postedDate');
+    const amountControl = this.addTransactionForm.get('amount');
+
+    this.addTransactionForm
+      .get('isCheque')
+      ?.valueChanges.subscribe((isCheque: boolean) => {
+        if (isCheque) {
+          chequeNumberControl?.setValidators([this.requiredValidator]);
+          postedDateControl?.setValidators([this.requiredValidator]);
+          amountControl?.setValidators([
+            this.requiredValidator,
+            onlyNumbersValidator(),
+          ]);
+        } else {
+          chequeNumberControl?.setValidators(null);
+          postedDateControl?.setValidators(null);
+          amountControl?.setValidators(null);
+        }
+
+        // Update the validation state
+        chequeNumberControl?.updateValueAndValidity();
+        postedDateControl?.updateValueAndValidity();
+        amountControl?.updateValueAndValidity();
+      });
+  }
+
+  private initEditTransactionForm(): void {
+    this.editTransactionForm = this.formBuilder.group({
+      transactionId: ['', this.requiredValidator],
+      date: ['', this.requiredValidator],
+      transactionType: ['', this.requiredValidator],
+      customerId: ['', this.requiredValidator],
+      isEmployee: ['', this.requiredValidator],
+      coa: ['', this.requiredValidator],
+      isCheque: ['', this.requiredValidator],
+      chequeNumber: ['', this.requiredValidator],
+      postedDate: ['', this.requiredValidator],
+      amount: ['', this.requiredValidator],
+    });
+
+    // Add conditional validators for chequeNumber, postedDate, and amount
+    const chequeNumberControl = this.editTransactionForm.get('chequeNumber');
+    const postedDateControl = this.editTransactionForm.get('postedDate');
+    const amountControl = this.editTransactionForm.get('amount');
+
+    this.editTransactionForm
+      .get('isCheque')
+      ?.valueChanges.subscribe((isCheque: boolean) => {
+        if (isCheque) {
+          chequeNumberControl?.setValidators([this.requiredValidator]);
+          postedDateControl?.setValidators([this.requiredValidator]);
+          amountControl?.setValidators([
+            this.requiredValidator,
+            onlyNumbersValidator(),
+          ]);
+        } else {
+          chequeNumberControl?.setValidators(null);
+          postedDateControl?.setValidators(null);
+          amountControl?.setValidators(null);
+        }
+
+        // Update the validation state
+        chequeNumberControl?.updateValueAndValidity();
+        postedDateControl?.updateValueAndValidity();
+        amountControl?.updateValueAndValidity();
+      });
   }
 
   public resetForm(): Promise<void> {
@@ -236,7 +308,12 @@ export class AuditTransactionService implements AuditTransactionFacade {
     const formValue = this.addTransactionForm.value;
 
     try {
-      await this.http.post<ApiResponse>(ADD_TRANSCTIONS, formValue).toPromise();
+      await this.http
+        .post<ApiResponse>(ADD_TRANSCTIONS, formValue)
+        .toPromise()
+        .then(() => {
+          this.resetAddForm();
+        });
     } catch (error) {
       // Handle error if needed
       console.error('Error adding transaction:', error);
@@ -256,6 +333,17 @@ export class AuditTransactionService implements AuditTransactionFacade {
       }
     } catch (error) {
       console.error('Error deleting transaction:', error);
+    }
+  }
+
+  async editTransaction(): Promise<void> {
+    try {
+      const formValue = this.editTransactionForm.value;
+      await this.http
+        .put<ApiResponse>(EDIT_TRANSACTIONS, formValue)
+        .toPromise();
+    } catch (error) {
+      console.log(error);
     }
   }
 

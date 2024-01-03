@@ -24,3 +24,6 @@ export const DELETE_TRANSACTIONS = (
   transactionId: number
 ) =>
   `${BASE_URL}transactions/delete-transaction?statementId=${statementId}&transactionId=${transactionId}`;
+
+// Edit Transaction URL
+export const EDIT_TRANSACTIONS = BASE_URL + 'transactions/update-transaction';

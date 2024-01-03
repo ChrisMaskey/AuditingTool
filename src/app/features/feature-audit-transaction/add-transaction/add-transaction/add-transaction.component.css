@@ -7,7 +7,7 @@
   @apply rounded-[1.25rem];
 }
 
-:host ::ng-deep .ng-tns-c4042076560-2.p-dialog-content {
+:host ::ng-deep .ng-tns-c4042076560-4.p-dialog-content {
   @apply rounded-[1.25rem] pt-[1.875rem] pb-[3.125rem] px-[6.25rem] !important;
 }
 
