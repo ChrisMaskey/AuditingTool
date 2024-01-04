@@ -51,6 +51,8 @@ export class AuditTransactionService implements AuditTransactionFacade {
   private transactionSubject = new BehaviorSubject<FetchTransaction[]>([]);
   transactions$ = this.transactionSubject.asObservable();
 
+  statementId!: number;
+
   private formBuilder = inject(FormBuilder);
   private requiredValidator = Validators.required;
 
@@ -131,6 +133,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   private initEditTransactionForm(): void {
     this.editTransactionForm = this.formBuilder.group({
+      statementId: ['', this.requiredValidator],
       transactionId: ['', this.requiredValidator],
       date: ['', this.requiredValidator],
       transactionType: ['', this.requiredValidator],
@@ -180,7 +183,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   public resetAddForm(): Promise<void> {
     return new Promise((resolve) => {
-      this.addTransactionForm.reset();
+      this.addTransactionForm.reset;
       resolve();
     });
   }
@@ -280,6 +283,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
     pageNumber: number
   ): Promise<FetchApiResponse> {
     const formValue = this.transactionFilterForm.value;
+
     return new Promise((resolve, reject) => {
       return this.http
         .post<FetchApiResponse>(
@@ -291,7 +295,11 @@ export class AuditTransactionService implements AuditTransactionFacade {
             this.transactionSubject.next(
               response.data.data.transaction as FetchTransaction[]
             );
+            this.statementId = response.data.data.statementId;
             this.addTransactionForm
+              .get('statementId')
+              ?.setValue(response.data.data.statementId);
+            this.editTransactionForm
               .get('statementId')
               ?.setValue(response.data.data.statementId);
             resolve(response);
@@ -353,6 +361,12 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   clearAccounts(): void {
     this.accountNumberSubject.next([]);
+  }
+
+  getStatementId() {
+    console.log(this.statementId);
+
+    return this.statementId;
   }
 }
 

@@ -162,6 +162,10 @@
   @apply rounded-[1.25rem] pt-[1.875rem] pb-[3.125rem] px-[6.25rem] !important;
 }
 
+:host ::ng-deep .ng-tns-c4042076560-3.p-dialog-content {
+  @apply rounded-[1.25rem] pt-[1.875rem] pb-[3.125rem] px-[6.25rem] !important;
+}
+
 /* InputText */
 :host ::ng-deep .p-inputtext {
   width: 96.5%;

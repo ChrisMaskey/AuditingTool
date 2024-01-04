@@ -83,4 +83,6 @@ export abstract class AuditTransactionFacade {
    * Edit Tranasction
    */
   abstract editTransaction(): Promise<void>;
+
+  abstract getStatementId(): number;
 }
