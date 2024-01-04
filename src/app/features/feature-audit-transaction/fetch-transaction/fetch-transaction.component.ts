@@ -181,6 +181,26 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.accountSubscription?.unsubscribe();
   }
 
+  // feat : Confirmation and addition to display when any value is selected.
+  isAnyDropdownSelected(): boolean {
+    return (
+      this.transactionFilterForm.get('clientId')?.value ||
+      this.transactionFilterForm.get('bankName')?.value ||
+      this.transactionFilterForm.get('accountNumber')?.value ||
+      this.transactionFilterForm.get('date')?.value
+    );
+  }
+
+  // feature : Extract legalName from provided ID when selecting dropdown name
+  getLegalName(id: number): Observable<string | null> {
+    return this.clients$.pipe(
+      map((clients) => {
+        const selectedName = clients.find((client) => client.id === id);
+        return selectedName ? selectedName.legalName : null;
+      })
+    );
+  }
+
   // Fetch Transactions
   async fetchTransactions() {
     if (this.transactionFilterForm.valid) {
@@ -277,7 +297,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     });
   }
 
-  private formatDate(date: Date | string): void {
+  protected formatDate(date: Date | string): void {
     let parsedDate: Date;
 
     if (typeof date === 'string') {
