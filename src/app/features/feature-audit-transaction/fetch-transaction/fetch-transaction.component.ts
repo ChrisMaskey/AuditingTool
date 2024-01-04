@@ -17,7 +17,6 @@ import { PaginatorModule } from 'primeng/paginator';
 import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Subscription } from 'rxjs/internal/Subscription';
-import { AddTransactionComponent } from '../add-transaction/add-transaction/add-transaction.component';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
@@ -33,7 +32,6 @@ import { Observable, map } from 'rxjs';
   selector: 'app-fetch-transaction',
   standalone: true,
   imports: [
-    AddTransactionComponent,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -65,6 +63,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
 
   private el = inject(ElementRef);
   protected transactionFilterForm!: FormGroup;
+  protected addTransactionForm!: FormGroup;
   protected editTransactionForm!: FormGroup;
 
   isOpen: boolean = false;
@@ -74,7 +73,9 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   pageSize: number = 8;
   pageNumber: number = 1;
   totalCount: number = 0;
-
+  maxDate!: Date;
+  minDate!: Date;
+  defaultDate!: Date;
   transactionType: TransactionType[] = [];
   transactionMode: TransactionMode[] = [];
 
@@ -92,6 +93,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.transactionFilterForm =
       this.auditTransactionService.transactionFilterForm;
     this.editTransactionForm = this.auditTransactionService.editTransactionForm;
+    this.addTransactionForm = this.auditTransactionService.addTransactionForm;
 
     // Get Clients
     this.auditTransactionService.getClients();
@@ -139,32 +141,37 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
       },
     ];
 
-    this.editTransactionForm
+    this.addTransactionForm
       .get('transactionType')
-      ?.valueChanges.subscribe((value) => {
-        const isEmployee = this.editTransactionForm.get('isEmployee')?.value;
-
-        if (isEmployee && value === 1) {
-          this.getCustomers(3);
-        } else if (!isEmployee && value === 1) {
-          this.getCustomers(1);
-        } else {
-          this.getCustomers(2);
-        }
+      ?.valueChanges.subscribe(() => {
+        this.handleFormChanges();
       });
 
-    this.editTransactionForm
-      .get('isEmployee')
-      ?.valueChanges.subscribe((isEmployee) => {
-        const transactionType =
-          this.editTransactionForm.get('transactionType')?.value;
+    this.addTransactionForm.get('isEmployee')?.valueChanges.subscribe(() => {
+      this.handleFormChanges();
+    });
 
-        if (isEmployee && transactionType === 1) {
-          this.getCustomers(3);
-        } else if (!isEmployee && transactionType === 1) {
-          this.getCustomers(1);
-        } else {
-          this.getCustomers(2);
+    this.editTransactionForm.valueChanges.subscribe(() => {
+      this.handleEditFormChanges();
+    });
+
+    this.transactionFilterForm
+      .get('date')
+      ?.valueChanges.subscribe((date: string) => {
+        if (date) {
+          const [month, year] = date.split('/');
+          const firstDayOfMonth = new Date(
+            parseInt(year),
+            parseInt(month) - 1,
+            1
+          );
+
+          const lastDayOfMonth = new Date(parseInt(year), parseInt(month), 0);
+
+          // Set the minDate and maxDate based on the selected month
+          this.minDate = firstDayOfMonth;
+          this.maxDate = lastDayOfMonth;
+          this.defaultDate = new Date(parseInt(year), parseInt(month) - 1, 1);
         }
       });
   }
@@ -198,6 +205,37 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Add Transaction
+  async addTransaction() {
+    this.formatAddDate(this.addTransactionForm.get('date')?.value);
+    this.formatAddPostedDate(this.addTransactionForm.get('postedDate')?.value);
+    this.formatAddAmount(this.addTransactionForm.get('amount')?.value);
+    try {
+      if (this.addTransactionForm.valid) {
+        await this.auditTransactionService.addTransaction();
+        this.auditTransactionService.getStatementId();
+        this.fetchTransactions();
+        this.closeAddDialog();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Transaction Added',
+        });
+      } else {
+        Object.values(this.addTransactionForm.controls).forEach((control) => {
+          control.markAsDirty();
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to add transaction',
+      });
+    }
+  }
+
   // Delete Transaction
   async deleteTransaction(transactionId: number) {
     this.auditTransactionService.deleteTransaction(transactionId).then(() => {
@@ -208,7 +246,9 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   // Edit Tranasaction
   async editTransaction() {
     this.formatEditDate(this.editTransactionForm.get('date')?.value);
-    this.formatPostedDate(this.editTransactionForm.get('postedDate')?.value);
+    this.formatEditPostedDate(
+      this.editTransactionForm.get('postedDate')?.value
+    );
 
     this.auditTransactionService.editTransaction().then(() => {
       this.fetchTransactions();
@@ -264,9 +304,19 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.editTransactionForm.get('date')?.setValue(formattedDate);
   }
 
-  private formatPostedDate(date: Date | string): void {
+  private formatEditPostedDate(date: Date | string): void {
     const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
     this.editTransactionForm.get('postedDate')?.setValue(formattedDate);
+  }
+
+  private formatAddDate(date: Date | string): void {
+    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
+    this.addTransactionForm.get('date')?.setValue(formattedDate);
+  }
+
+  private formatAddPostedDate(date: Date | string): void {
+    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
+    this.addTransactionForm.get('postedDate')?.setValue(formattedDate);
   }
 
   // Format Amount
@@ -293,7 +343,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.addModalVisible = true;
   }
 
-  closeAddDialog() {
+  async closeAddDialog() {
     this.addModalVisible = false;
   }
 
@@ -304,6 +354,13 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
         return selectedCoa ? selectedCoa.id : null;
       })
     );
+  }
+
+  private formatAddAmount(amount: number): void {
+    const formattedAmount = parseFloat(
+      this.addTransactionForm.get('amount')?.value
+    );
+    this.addTransactionForm.get('amount')?.setValue(formattedAmount);
   }
 
   // Toggle Edit Transaction Dropdown
@@ -391,6 +448,47 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
         }
       },
     });
+  }
+
+  handleFormChanges(): void {
+    const transactionType =
+      this.addTransactionForm.get('transactionType')?.value;
+    const isEmployee = this.addTransactionForm.get('isEmployee')?.value;
+
+    let customerType: number;
+
+    if (transactionType === 1) {
+      customerType = isEmployee ? 3 : 1;
+    } else {
+      customerType = 2;
+    }
+
+    this.getCustomers(customerType);
+  }
+
+  handleEditFormChanges(): void {
+    const transactionType =
+      this.editTransactionForm.get('transactionType')?.value;
+    const isEmployee = this.editTransactionForm.get('isEmployee')?.value;
+
+    let customerType: number;
+
+    if (transactionType === 1) {
+      customerType = isEmployee ? 3 : 1;
+    } else {
+      customerType = 2;
+    }
+
+    this.getCustomers(customerType);
+  }
+
+  getMaxDate(): Date {
+    const dateControl = this.transactionFilterForm.get('date');
+    console.log('Date Control Value:', dateControl?.value);
+
+    return dateControl && dateControl.value
+      ? new Date(dateControl.value)
+      : new Date();
   }
 
   // Paginator Page Index
