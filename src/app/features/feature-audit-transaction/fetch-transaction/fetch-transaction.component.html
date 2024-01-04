@@ -3,16 +3,51 @@
 >
   <div class="flex justify-between items-center">
     <!-- Dropdown Placeholder with Reset Button -->
-    <div class="transaction-dropdown-placeholder">
-      <!-- Dropdown placeholder -->
-
-      <div
-        class="flex items-center justify-between w-full"
-        (click)="toggleDropdown()"
+    <div
+      class="transaction-dropdown-placeholder flex"
+      (click)="toggleDropdown()"
+    >
+      <h5
+        [hidden]="isAnyDropdownSelected()"
+        class="text-sm font-medium leading-[1.3125rem]"
       >
-        <h5 class="text-sm font-medium leading-[1.3125rem]">
-          Search your transaction here
-        </h5>
+        Search your transaction here
+      </h5>
+      <!-- Displays selected filters if any are selected -->
+      <div *ngIf="isAnyDropdownSelected()">
+        <div class="flex gap-[4px]">
+          <div
+            class="text-[#495057] bg-[#DEE2E6] rounded-[0.25rem] px-[0.656rem] py-[0.328rem]"
+            *ngIf="transactionFilterForm.get('clientId')!.value"
+          >
+            {{
+              getLegalName(transactionFilterForm.get("clientId")!.value) | async
+            }}
+          </div>
+
+          <div
+            class="text-[#495057] bg-[#DEE2E6] rounded-[0.25rem] px-[0.656rem] py-[0.328rem]"
+            *ngIf="transactionFilterForm.get('bankName')?.value"
+          >
+            {{ this.transactionFilterForm.get("bankName")?.value }}
+          </div>
+          <div
+            class="text-[#495057] bg-[#DEE2E6] rounded-[0.25rem] px-[0.656rem] py-[0.328rem]"
+            *ngIf="transactionFilterForm.get('accountNumber')?.value"
+          >
+            {{ this.transactionFilterForm.get("accountNumber")?.value }}
+          </div>
+          <div
+            class="text-[#495057] bg-[#DEE2E6] rounded-[0.25rem] px-[0.656rem] py-[0.328rem]"
+            *ngIf="transactionFilterForm.get('date')?.value"
+          >
+            {{ this.transactionFilterForm.get("date")?.value }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Dropdown placeholder with Filter and Reset Button -->
+      <div class="flex gap-[0.5rem]">
         <!-- Filter Icon -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -27,35 +62,34 @@
             stroke-width="1.5"
           />
         </svg>
-      </div>
-
-      <!-- Reset Icon -->
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 16 17"
-        fill="none"
-        (click)="resetForm()"
-      >
-        <g clip-path="url(#clip0_235_5363)">
-          <path
-            d="M15.0912 3.34464L14.0841 4.13214C12.7109 2.37679 10.5751 1.25 8.17693 1.25C4.03586 1.25 0.684074 4.59821 0.678717 8.74107C0.67336 12.8875 4.03229 16.25 8.17693 16.25C11.4144 16.25 14.1734 14.1964 15.2234 11.3196C15.2501 11.2446 15.2109 11.1607 15.1359 11.1357L14.1234 10.7875C14.0881 10.7754 14.0494 10.7776 14.0157 10.7936C13.982 10.8096 13.9559 10.8382 13.943 10.8732C13.9109 10.9625 13.8751 11.0518 13.8376 11.1393C13.5287 11.8714 13.0859 12.5286 12.5216 13.0929C11.9618 13.6536 11.2991 14.1011 10.5698 14.4107C9.81443 14.7304 9.00907 14.8929 8.1805 14.8929C7.35015 14.8929 6.54657 14.7304 5.79122 14.4107C5.06117 14.1024 4.39822 13.6548 3.83943 13.0929C3.27818 12.5332 2.83119 11.8697 2.52336 11.1393C2.20372 10.3821 2.04122 9.57857 2.04122 8.74822C2.04122 7.91786 2.20372 7.11429 2.52336 6.35714C2.83229 5.625 3.27515 4.96786 3.83943 4.40357C4.40372 3.83929 5.06086 3.39643 5.79122 3.08571C6.54657 2.76607 7.35193 2.60357 8.1805 2.60357C9.01086 2.60357 9.81443 2.76607 10.5698 3.08571C11.2998 3.39401 11.9628 3.84164 12.5216 4.40357C12.6984 4.58036 12.8644 4.76786 13.018 4.96429L11.943 5.80357C11.9217 5.82003 11.9055 5.84215 11.8963 5.8674C11.887 5.89265 11.8851 5.91999 11.8907 5.9463C11.8963 5.9726 11.9092 5.99679 11.9279 6.01608C11.9467 6.03537 11.9704 6.04899 11.9966 6.05536L15.1323 6.82322C15.2216 6.84464 15.3091 6.77679 15.3091 6.68572L15.3234 3.45536C15.3216 3.3375 15.1841 3.27143 15.0912 3.34464Z"
-            fill="black"
-            fill-opacity="0.85"
-          />
-        </g>
-        <defs>
-          <clipPath id="clip0_235_5363">
-            <rect
-              width="16"
-              height="16"
-              fill="white"
-              transform="translate(0 0.75)"
+        <!-- Reset Icon -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 16 17"
+          fill="none"
+          (click)="resetForm()"
+        >
+          <g clip-path="url(#clip0_235_5363)">
+            <path
+              d="M15.0912 3.34464L14.0841 4.13214C12.7109 2.37679 10.5751 1.25 8.17693 1.25C4.03586 1.25 0.684074 4.59821 0.678717 8.74107C0.67336 12.8875 4.03229 16.25 8.17693 16.25C11.4144 16.25 14.1734 14.1964 15.2234 11.3196C15.2501 11.2446 15.2109 11.1607 15.1359 11.1357L14.1234 10.7875C14.0881 10.7754 14.0494 10.7776 14.0157 10.7936C13.982 10.8096 13.9559 10.8382 13.943 10.8732C13.9109 10.9625 13.8751 11.0518 13.8376 11.1393C13.5287 11.8714 13.0859 12.5286 12.5216 13.0929C11.9618 13.6536 11.2991 14.1011 10.5698 14.4107C9.81443 14.7304 9.00907 14.8929 8.1805 14.8929C7.35015 14.8929 6.54657 14.7304 5.79122 14.4107C5.06117 14.1024 4.39822 13.6548 3.83943 13.0929C3.27818 12.5332 2.83119 11.8697 2.52336 11.1393C2.20372 10.3821 2.04122 9.57857 2.04122 8.74822C2.04122 7.91786 2.20372 7.11429 2.52336 6.35714C2.83229 5.625 3.27515 4.96786 3.83943 4.40357C4.40372 3.83929 5.06086 3.39643 5.79122 3.08571C6.54657 2.76607 7.35193 2.60357 8.1805 2.60357C9.01086 2.60357 9.81443 2.76607 10.5698 3.08571C11.2998 3.39401 11.9628 3.84164 12.5216 4.40357C12.6984 4.58036 12.8644 4.76786 13.018 4.96429L11.943 5.80357C11.9217 5.82003 11.9055 5.84215 11.8963 5.8674C11.887 5.89265 11.8851 5.91999 11.8907 5.9463C11.8963 5.9726 11.9092 5.99679 11.9279 6.01608C11.9467 6.03537 11.9704 6.04899 11.9966 6.05536L15.1323 6.82322C15.2216 6.84464 15.3091 6.77679 15.3091 6.68572L15.3234 3.45536C15.3216 3.3375 15.1841 3.27143 15.0912 3.34464Z"
+              fill="black"
+              fill-opacity="0.85"
             />
-          </clipPath>
-        </defs>
-      </svg>
+          </g>
+          <defs>
+            <clipPath id="clip0_235_5363">
+              <rect
+                width="16"
+                height="16"
+                fill="white"
+                transform="translate(0 0.75)"
+              />
+            </clipPath>
+          </defs>
+        </svg>
+      </div>
     </div>
 
     <p-button *ngIf="fetchTransaction" (click)="openAddDialog()">
@@ -367,6 +401,7 @@
           [readonlyInput]="true"
           [showIcon]="true"
           class="placeholder:text-[#6C757D]"
+          (onSelect)="formatDate(this.transactionFilterForm.get('date')?.value)"
         ></p-calendar>
       </form>
 

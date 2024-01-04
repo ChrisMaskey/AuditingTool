@@ -1,5 +1,5 @@
 .transaction-dropdown-placeholder {
-  @apply flex items-center justify-between gap-1 w-[28.5rem] bg-gray-100 rounded-md px-5 py-[0.625rem] border border-[#CED4DA] cursor-pointer;
+  @apply flex items-center justify-between gap-1 w-[28.5rem] bg-gray-100 rounded-md px-[0.641rem] py-[0.625rem] border border-[#CED4DA] cursor-pointer;
 }
 
 /* DROPDOWN */
