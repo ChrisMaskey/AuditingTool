@@ -217,20 +217,20 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.formatAddPostedDate(this.addTransactionForm.get('postedDate')?.value);
     this.formatAddAmount(this.addTransactionForm.get('amount')?.value);
     try {
-      if (this.addTransactionForm.valid) {
-        await this.auditTransactionService.addTransaction().then(() => {
-          this.closeAddDialog();
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Transaction Added',
-          });
+      // if (this.addTransactionForm.valid) {
+      await this.auditTransactionService.addTransaction().then(() => {
+        this.closeAddDialog();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Transaction Added',
         });
-      } else {
-        Object.values(this.addTransactionForm.controls).forEach((control) => {
-          control.markAsDirty();
-        });
-      }
+      });
+      // } else {
+      // Object.values(this.addTransactionForm.controls).forEach((control) => {
+      //   control.markAsDirty();
+      // });
+      // }
     } catch (error) {
       console.log(error);
       this.messageService.add({
@@ -255,9 +255,19 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
       this.editTransactionForm.get('postedDate')?.value
     );
 
+    if (this.editTransactionForm.get('isCheque')?.value === false) {
+      this.editTransactionForm.get('chequeNumber')?.patchValue(null);
+      this.editTransactionForm.get('postedDate')?.patchValue('');
+    }
+
     if (this.editTransactionForm.valid) {
       this.auditTransactionService.editTransaction().then(() => {
         this.fetchTransactions();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Transaction Successfully Updated',
+        });
         this.closeEditDialog();
       });
     } else {
@@ -322,7 +332,6 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
       // If it's a string, assume it's already in the correct format
       formattedDate = date;
     } else {
-      console.error('Invalid date format:', date);
       return;
     }
 

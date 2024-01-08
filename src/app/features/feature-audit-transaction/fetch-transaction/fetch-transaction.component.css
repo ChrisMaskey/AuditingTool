@@ -7,6 +7,10 @@
   font-family: "Inter" !important;
 }
 
+:host ::ng-deep p-dropdownitem.p-element.ng-start-inserted {
+  @apply text-[0.75rem] !important;
+}
+
 :host ::ng-deep .p-dropdown {
   width: 100%;
 }

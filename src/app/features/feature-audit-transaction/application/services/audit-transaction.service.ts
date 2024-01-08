@@ -101,7 +101,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
       isCheque: ['', this.requiredValidator],
       chequeNumber: ['', [this.requiredValidator, chequeNumberValidator]],
       postedDate: ['', this.requiredValidator],
-      amount: ['', [this.requiredValidator, onlyNumbersValidator]],
+      amount: ['', [this.requiredValidator]],
     });
 
     // Add conditional validators for chequeNumber, postedDate, and amount
@@ -115,10 +115,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
         if (isCheque) {
           chequeNumberControl?.setValidators([this.requiredValidator]);
           postedDateControl?.setValidators([this.requiredValidator]);
-          amountControl?.setValidators([
-            this.requiredValidator,
-            onlyNumbersValidator(),
-          ]);
+          amountControl?.setValidators([this.requiredValidator]);
         } else {
           chequeNumberControl?.setValidators(null);
           postedDateControl?.setValidators(null);
@@ -143,7 +140,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
       coa: ['', this.requiredValidator],
       isCheque: ['', this.requiredValidator],
       chequeNumber: ['', [this.requiredValidator, chequeNumberValidator]],
-      postedDate: ['', [this.requiredValidator, onlyNumbersValidator]],
+      postedDate: ['', this.requiredValidator],
       amount: ['', this.requiredValidator],
     });
 
@@ -158,10 +155,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
         if (isCheque) {
           chequeNumberControl?.setValidators([this.requiredValidator]);
           postedDateControl?.setValidators([this.requiredValidator]);
-          amountControl?.setValidators([
-            this.requiredValidator,
-            onlyNumbersValidator(),
-          ]);
+          amountControl?.setValidators([this.requiredValidator]);
         } else {
           chequeNumberControl?.setValidators(null);
           postedDateControl?.setValidators(null);
@@ -184,10 +178,11 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   public resetAddForm(): Promise<void> {
     return new Promise((resolve) => {
-      this.addTransactionForm.reset;
+      this.addTransactionForm.reset();
       this.addTransactionForm
         .get('statementId')
         ?.setValue(this.getStatementId());
+      this.addTransactionForm.get('isEmployee')?.setValue(false);
       resolve();
     });
   }
@@ -320,12 +315,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
     const formValue = this.addTransactionForm.value;
 
     try {
-      await this.http
-        .post<ApiResponse>(ADD_TRANSCTIONS, formValue)
-        .toPromise()
-        .then(() => {
-          this.resetAddForm();
-        });
+      await this.http.post<ApiResponse>(ADD_TRANSCTIONS, formValue).toPromise();
     } catch (error) {
       // Handle error if needed
       console.error('Error adding transaction:', error);
@@ -372,20 +362,20 @@ export class AuditTransactionService implements AuditTransactionFacade {
   }
 }
 
-export function onlyNumbersValidator(): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
-    const value = control.value;
+// export function onlyNumbersValidator(): ValidatorFn {
+//   return (control: AbstractControl): { [key: string]: any } | null => {
+//     const value = control.value;
 
-    if (value === null || value === undefined || value === '') {
-      // Allow empty values
-      return null;
-    }
+//     if (value === null || value === undefined || value === '') {
+//       // Allow empty values
+//       return null;
+//     }
 
-    const isNumber = /^[0-9]*$/.test(value);
+//     const isNumber = /^[0-9]*$/.test(value);
 
-    return isNumber ? null : { onlyNumbers: { value: control.value } };
-  };
-}
+//     return isNumber ? null : { onlyNumbers: { value: control.value } };
+//   };
+// }
 
 export function chequeNumberValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
