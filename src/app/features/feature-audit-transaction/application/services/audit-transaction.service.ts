@@ -4,6 +4,7 @@ import {
   AbstractControl,
   FormBuilder,
   FormGroup,
+  ValidationErrors,
   ValidatorFn,
   Validators,
 } from '@angular/forms';
@@ -76,15 +77,15 @@ export class AuditTransactionService implements AuditTransactionFacade {
       date: ['', this.requiredValidator],
       filterParams: this.formBuilder.group({
         date: [''],
-        transactionMode: [''],
-        name: [''],
-        coa: [''],
-        chequeNumber: [''],
-        transactionType: [''],
-        isEmployee: [true],
+        transactionMode: [null],
+        name: [null],
+        coa: [null],
+        chequeNumber: [null],
+        transactionType: [null],
+        isEmployee: [null],
         postedDate: [''],
-        amount: [0],
-        tradeType: [''],
+        amount: [null],
+        tradeType: [null],
       }),
     });
   }
@@ -98,9 +99,9 @@ export class AuditTransactionService implements AuditTransactionFacade {
       isEmployee: [false, this.requiredValidator],
       coa: ['', this.requiredValidator],
       isCheque: ['', this.requiredValidator],
-      chequeNumber: ['', this.requiredValidator],
+      chequeNumber: ['', [this.requiredValidator, chequeNumberValidator]],
       postedDate: ['', this.requiredValidator],
-      amount: ['', [this.requiredValidator, onlyNumbersValidator()]],
+      amount: ['', [this.requiredValidator]],
     });
 
     // Add conditional validators for chequeNumber, postedDate, and amount
@@ -114,10 +115,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
         if (isCheque) {
           chequeNumberControl?.setValidators([this.requiredValidator]);
           postedDateControl?.setValidators([this.requiredValidator]);
-          amountControl?.setValidators([
-            this.requiredValidator,
-            onlyNumbersValidator(),
-          ]);
+          amountControl?.setValidators([this.requiredValidator]);
         } else {
           chequeNumberControl?.setValidators(null);
           postedDateControl?.setValidators(null);
@@ -141,7 +139,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
       isEmployee: ['', this.requiredValidator],
       coa: ['', this.requiredValidator],
       isCheque: ['', this.requiredValidator],
-      chequeNumber: ['', this.requiredValidator],
+      chequeNumber: ['', [this.requiredValidator, chequeNumberValidator]],
       postedDate: ['', this.requiredValidator],
       amount: ['', this.requiredValidator],
     });
@@ -157,10 +155,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
         if (isCheque) {
           chequeNumberControl?.setValidators([this.requiredValidator]);
           postedDateControl?.setValidators([this.requiredValidator]);
-          amountControl?.setValidators([
-            this.requiredValidator,
-            onlyNumbersValidator(),
-          ]);
+          amountControl?.setValidators([this.requiredValidator]);
         } else {
           chequeNumberControl?.setValidators(null);
           postedDateControl?.setValidators(null);
@@ -183,7 +178,11 @@ export class AuditTransactionService implements AuditTransactionFacade {
 
   public resetAddForm(): Promise<void> {
     return new Promise((resolve) => {
-      this.addTransactionForm.reset;
+      this.addTransactionForm.reset();
+      this.addTransactionForm
+        .get('statementId')
+        ?.setValue(this.getStatementId());
+      this.addTransactionForm.get('isEmployee')?.setValue(false);
       resolve();
     });
   }
@@ -316,12 +315,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
     const formValue = this.addTransactionForm.value;
 
     try {
-      await this.http
-        .post<ApiResponse>(ADD_TRANSCTIONS, formValue)
-        .toPromise()
-        .then(() => {
-          this.resetAddForm();
-        });
+      await this.http.post<ApiResponse>(ADD_TRANSCTIONS, formValue).toPromise();
     } catch (error) {
       // Handle error if needed
       console.error('Error adding transaction:', error);
@@ -364,23 +358,54 @@ export class AuditTransactionService implements AuditTransactionFacade {
   }
 
   getStatementId() {
-    console.log(this.statementId);
-
     return this.statementId;
   }
 }
 
-export function onlyNumbersValidator(): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
-    const value = control.value;
+// export function onlyNumbersValidator(): ValidatorFn {
+//   return (control: AbstractControl): { [key: string]: any } | null => {
+//     const value = control.value;
 
-    if (value === null || value === undefined || value === '') {
-      // Allow empty values
-      return null;
+//     if (value === null || value === undefined || value === '') {
+//       // Allow empty values
+//       return null;
+//     }
+
+//     const isNumber = /^[0-9]*$/.test(value);
+
+//     return isNumber ? null : { onlyNumbers: { value: control.value } };
+//   };
+// }
+
+export function chequeNumberValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const chequeNumber = control.value;
+
+    // Check if the value is numeric
+    if (isNaN(chequeNumber)) {
+      return {
+        numeric: true,
+        message: 'Cheque Number should only contain numeric values.',
+      };
     }
 
-    const isNumber = /^[0-9]*$/.test(value);
+    // Check if the length is not exceeding 15 digits
+    if (chequeNumber.toString().length > 15) {
+      return {
+        maxLength: true,
+        message: 'Cheque Number should not exceed 15 digits.',
+      };
+    }
 
-    return isNumber ? null : { onlyNumbers: { value: control.value } };
+    // Check if there are no alphabets
+    if (/[a-zA-Z]/.test(chequeNumber)) {
+      return {
+        noAlphabets: true,
+        message: 'Cheque Number should not have any alphabets.',
+      };
+    }
+
+    // If all checks pass, return null (no errors)
+    return null;
   };
 }

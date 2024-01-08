@@ -73,6 +73,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   pageSize: number = 8;
   pageNumber: number = 1;
   totalCount: number = 0;
+  customer: boolean = false;
   maxDate!: Date;
   minDate!: Date;
   defaultDate!: Date;
@@ -150,8 +151,13 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.addTransactionForm.get('isEmployee')?.valueChanges.subscribe(() => {
       this.handleFormChanges();
     });
+    this.editTransactionForm
+      .get('transactionType')
+      ?.valueChanges.subscribe(() => {
+        this.handleEditFormChanges();
+      });
 
-    this.editTransactionForm.valueChanges.subscribe(() => {
+    this.editTransactionForm.get('isEmployee')?.valueChanges.subscribe(() => {
       this.handleEditFormChanges();
     });
 
@@ -231,21 +237,20 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.formatAddPostedDate(this.addTransactionForm.get('postedDate')?.value);
     this.formatAddAmount(this.addTransactionForm.get('amount')?.value);
     try {
-      if (this.addTransactionForm.valid) {
-        await this.auditTransactionService.addTransaction();
-        this.auditTransactionService.getStatementId();
-        this.fetchTransactions();
+      // if (this.addTransactionForm.valid) {
+      await this.auditTransactionService.addTransaction().then(() => {
         this.closeAddDialog();
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
           detail: 'Transaction Added',
         });
-      } else {
-        Object.values(this.addTransactionForm.controls).forEach((control) => {
-          control.markAsDirty();
-        });
-      }
+      });
+      // } else {
+      // Object.values(this.addTransactionForm.controls).forEach((control) => {
+      //   control.markAsDirty();
+      // });
+      // }
     } catch (error) {
       console.log(error);
       this.messageService.add({
@@ -270,10 +275,26 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
       this.editTransactionForm.get('postedDate')?.value
     );
 
-    this.auditTransactionService.editTransaction().then(() => {
-      this.fetchTransactions();
-      this.closeEditDialog();
-    });
+    if (this.editTransactionForm.get('isCheque')?.value === false) {
+      this.editTransactionForm.get('chequeNumber')?.patchValue(null);
+      this.editTransactionForm.get('postedDate')?.patchValue('');
+    }
+
+    if (this.editTransactionForm.valid) {
+      this.auditTransactionService.editTransaction().then(() => {
+        this.fetchTransactions();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Transaction Successfully Updated',
+        });
+        this.closeEditDialog();
+      });
+    } else {
+      Object.values(this.editTransactionForm.controls).forEach((control) => {
+        control.markAsDirty();
+      });
+    }
   }
 
   // Get COA
@@ -319,16 +340,40 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.transactionFilterForm.get('date')?.setValue(formattedDate);
   }
 
+  // FOR EDIT
   private formatEditDate(date: Date | string): void {
-    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
+    let formattedDate: string;
+
+    if (date instanceof Date) {
+      // If it's a Date object, format it using DatePipe
+      formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy') || '';
+    } else if (typeof date === 'string') {
+      // If it's a string, assume it's already in the correct format
+      formattedDate = date;
+    } else {
+      return;
+    }
+
     this.editTransactionForm.get('date')?.setValue(formattedDate);
   }
 
   private formatEditPostedDate(date: Date | string): void {
-    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
+    let formattedDate: string;
+
+    if (date instanceof Date) {
+      // If it's a Date object, format it using DatePipe
+      formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy') || '';
+    } else if (typeof date === 'string') {
+      // If it's a string, assume it's already in the correct format
+      formattedDate = date;
+    } else {
+      console.error('Invalid date format:', date);
+      return;
+    }
     this.editTransactionForm.get('postedDate')?.setValue(formattedDate);
   }
 
+  // FOR ADD
   private formatAddDate(date: Date | string): void {
     const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
     this.addTransactionForm.get('date')?.setValue(formattedDate);
@@ -364,6 +409,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   }
 
   async closeAddDialog() {
+    this.auditTransactionService.resetAddForm();
     this.addModalVisible = false;
   }
 
@@ -391,7 +437,6 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.editTransactionForm.patchValue({
       transactionId: transaction.id,
       date: transaction.date,
-      // coa: transaction.coa,
       transactionType: transaction.transactionType === 'Deposit' ? 0 : 1,
       isEmployee: transaction.isEmployee,
       customerId: transaction.customerId,
@@ -400,6 +445,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
       chequeNumber: transaction.chequeNumber,
       postedDate: transaction.postedDate,
     });
+
     this.editModalVisible = true;
   }
 
@@ -486,7 +532,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.getCustomers(customerType);
   }
 
-  handleEditFormChanges(): void {
+  async handleEditFormChanges() {
     const transactionType =
       this.editTransactionForm.get('transactionType')?.value;
     const isEmployee = this.editTransactionForm.get('isEmployee')?.value;
@@ -495,22 +541,16 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
 
     if (transactionType === 1) {
       customerType = isEmployee ? 3 : 1;
-    } else {
+    } else if (transactionType === 0) {
       customerType = 2;
+    } else {
+      customerType = 0;
     }
 
-    this.getCustomers(customerType);
+    await this.getCustomers(customerType).then((response) => {
+      this.customer = true;
+    });
   }
-
-  getMaxDate(): Date {
-    const dateControl = this.transactionFilterForm.get('date');
-    console.log('Date Control Value:', dateControl?.value);
-
-    return dateControl && dateControl.value
-      ? new Date(dateControl.value)
-      : new Date();
-  }
-
   // Paginator Page Index
   calculateStartIndex() {
     return (this.pageNumber - 1) * this.pageSize + 1;
@@ -525,6 +565,19 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   handleOutsideClick(event: Event) {
     if (!this.el.nativeElement.contains(event.target)) {
       this.closeDropdown();
+    }
+  }
+
+  allowOnlyNumbers(event: KeyboardEvent, input: HTMLInputElement) {
+    const allowedChars = /[0-9.-]/;
+
+    // Allow deletion with Backspace or Delete keys
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      return; // Allow deletion
+    }
+
+    if (!allowedChars.test(event.key)) {
+      event.preventDefault();
     }
   }
 }

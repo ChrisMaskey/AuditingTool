@@ -452,14 +452,16 @@
           <p-calendar
             formControlName="date"
             placeholder="Transaction Date"
+            [minDate]="minDate"
+            [maxDate]="maxDate"
+            [defaultDate]="defaultDate"
             [readonlyInput]="true"
+            [dateFormat]="'dd/mm/yy'"
             [showIcon]="true"
             class="w-full"
             appendTo="body"
             [ngClass]="{
-              'ng-dirty ng-invalid':
-                editTransactionForm.get('date')!.invalid &&
-                editTransactionForm.get('date')?.touched
+              'ng-dirty ng-invalid': editTransactionForm.get('date')!.dirty
             }"
           ></p-calendar>
           <p-dropdown
@@ -468,13 +470,12 @@
             [options]="coa"
             optionLabel="coa"
             placeholder="COA"
+            appendTo="body"
             [required]="true"
             class="w-full"
             [optionValue]="'id'"
             [ngClass]="{
-              'ng-dirty ng-invalid':
-                editTransactionForm.get('coa')!.invalid &&
-                editTransactionForm.get('coa')?.touched
+              'ng-dirty ng-invalid': editTransactionForm.get('coa')!.dirty
             }"
           >
           </p-dropdown>
@@ -488,12 +489,12 @@
               optionLabel="type"
               placeholder="Transaction Type"
               [required]="true"
+              appendTo="body"
               [optionValue]="'value'"
               class="w-full"
               [ngClass]="{
                 'ng-dirty ng-invalid':
-                  editTransactionForm.get('transactionType')!.invalid &&
-                  editTransactionForm.get('transactionType')?.touched
+                  editTransactionForm.get('transactionType')!.dirty
               }"
             >
             </p-dropdown>
@@ -523,6 +524,7 @@
               *ngIf="customers$ | async as customer"
               formControlName="customerId"
               [options]="customer"
+              appendTo="body"
               optionLabel="name"
               placeholder="Name"
               [optionValue]="'id'"
@@ -530,8 +532,7 @@
               class="w-full"
               [ngClass]="{
                 'ng-dirty ng-invalid':
-                  editTransactionForm.get('customerId')!.invalid &&
-                  editTransactionForm.get('customerId')?.touched
+                  editTransactionForm.get('customerId')!.dirty
               }"
             >
             </p-dropdown>
@@ -549,27 +550,28 @@
             formControlName="isCheque"
             [options]="transactionMode"
             optionLabel="mode"
+            appendTo="body"
             placeholder="Transaction Mode"
             [required]="true"
             [optionValue]="'value'"
             class="w-full"
             [ngClass]="{
-              'ng-dirty ng-invalid':
-                editTransactionForm.get('isCheque')!.invalid &&
-                editTransactionForm.get('isCheque')?.touched
+              'ng-dirty ng-invalid': editTransactionForm.get('isCheque')!.dirty
             }"
           >
           </p-dropdown>
           <input
+            #amountInput
+            (keydown)="allowOnlyNumbers($event, amountInput)"
             type="text"
             pInputText
             formControlName="amount"
             placeholder="Amount"
+            appendTo="body"
             [required]="true"
+            pKeyFilter="num"
             [ngClass]="{
-              'ng-dirty ng-invalid':
-                editTransactionForm.get('amount')!.invalid &&
-                editTransactionForm.get('amount')?.touched
+              'ng-dirty ng-invalid': editTransactionForm.get('amount')!.dirty
             }"
           />
         </div>
@@ -578,27 +580,33 @@
         >
           <div class="flex items-center justify-between gap-10 w-full">
             <input
+              #amountInput
+              (keydown)="allowOnlyNumbers($event, amountInput)"
               pInputText
               formControlName="chequeNumber"
               placeholder="Cheque Number"
               [required]="true"
+              pKeyFilter="num"
+              [maxlength]="15"
               [ngClass]="{
                 'ng-dirty ng-invalid':
-                  editTransactionForm.get('chequeNumber')!.invalid &&
-                  editTransactionForm.get('chequeNumber')?.touched
+                  editTransactionForm.get('chequeNumber')!.dirty
               }"
             />
             <p-calendar
               formControlName="postedDate"
               placeholder="Posted Date"
+              [minDate]="minDate"
+              [maxDate]="maxDate"
+              [defaultDate]="defaultDate"
               [readonlyInput]="true"
               [showIcon]="true"
+              [dateFormat]="'dd/mm/yy'"
               class="w-full"
               appendTo="body"
               [ngClass]="{
                 'ng-dirty ng-invalid':
-                  editTransactionForm.get('postedDate')!.hasError('required') &&
-                  editTransactionForm.get('postedDate')?.touched
+                  editTransactionForm.get('postedDate')!.dirty
               }"
             ></p-calendar>
           </div>
@@ -750,6 +758,8 @@
           >
           </p-dropdown>
           <input
+            #amountInput
+            (keydown)="allowOnlyNumbers($event, amountInput)"
             type="text"
             pInputText
             formControlName="amount"
@@ -766,9 +776,13 @@
           <div class="flex items-center justify-between gap-10 w-full">
             <input
               pInputText
+              #amountInput
+              (keydown)="allowOnlyNumbers($event, amountInput)"
               formControlName="chequeNumber"
               placeholder="Cheque Number"
               [required]="true"
+              pKeyFilter="num"
+              [maxlength]="15"
               [ngClass]="{
                 'ng-dirty ng-invalid':
                   addTransactionForm.get('chequeNumber')!.dirty

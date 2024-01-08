@@ -3,6 +3,14 @@
 }
 
 /* DROPDOWN */
+:host ::ng-deep .p-component {
+  font-family: "Inter" !important;
+}
+
+:host ::ng-deep p-dropdownitem.p-element.ng-start-inserted {
+  @apply text-[0.75rem] !important;
+}
+
 :host ::ng-deep .p-dropdown {
   width: 100%;
 }
@@ -35,6 +43,7 @@
 }
 
 :host ::ng-deep .ng-star-inserted {
+  font-family: "Inter";
   font-size: 0.75rem !important;
   font-weight: 400;
 }
@@ -48,6 +57,17 @@
 
 :host ::ng-deep calendaricon {
   color: #6c757d;
+}
+
+:host ::ng-deep .p-ripple.p-element.p-dropdown-item {
+  font-family: "Inter" !important;
+  font-size: 0.75rem !important;
+  font-weight: 400;
+}
+:host ::ng-deep .p-ripple.p-element.p-dropdown-item.p-highlight {
+  font-family: "Inter" !important;
+  font-size: 0.75rem !important;
+  font-weight: 400;
 }
 
 /* Table Css */
