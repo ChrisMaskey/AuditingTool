@@ -1,5 +1,5 @@
 import { FormGroup } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Client } from '../entity/client.model';
 import { Bank } from '../entity/bank.model';
 import { AccountNumber } from '../entity/account-number.model';
@@ -30,7 +30,6 @@ export abstract class AuditTransactionFacade {
   abstract transactions$: Observable<FetchTransaction[]>;
   abstract coa$: Observable<Coa[]>;
   abstract customers$: Observable<Customer[]>;
-
   /**
    * Retrives all the clients
    */

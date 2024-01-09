@@ -26,7 +26,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { FetchTransaction } from '../application/entity/fetch-transaction.model';
 import { ApiResponse } from '../../../interfaces/api-response-interface';
 import { FetchApiResponse } from '../../../interfaces/fetch-api-response.interface';
-import { Observable, map } from 'rxjs';
+import { Observable, debounceTime, map } from 'rxjs';
 
 @Component({
   selector: 'app-fetch-transaction',
@@ -81,6 +81,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
 
   private bankSubscription: Subscription | undefined = new Subscription();
   private accountSubscription: Subscription | undefined = new Subscription();
+  private coabyId: Subscription | undefined = new Subscription();
 
   constructor(
     private datePipe: DatePipe,
@@ -233,9 +234,13 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   async addTransaction() {
     this.formatAddDate(this.addTransactionForm.get('date')?.value);
     this.formatAddPostedDate(this.addTransactionForm.get('postedDate')?.value);
-    this.formatAddAmount(this.addTransactionForm.get('amount')?.value);
+    parseFloat(this.addTransactionForm.get('amount')?.value);
     try {
-      if (this.addTransactionForm.valid) {
+      if (
+        this.addTransactionForm.valid &&
+        this.addTransactionForm.get('amount')?.value !== '' &&
+        this.addTransactionForm.get('amount')?.value !== null
+      ) {
         await this.auditTransactionService.addTransaction().then(() => {
           this.closeAddDialog();
           this.messageService.add({
@@ -244,9 +249,12 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
             detail: 'Transaction Added',
           });
         });
+        this.fetchTransactions();
       } else {
         Object.values(this.addTransactionForm.controls).forEach((control) => {
-          control.markAsDirty();
+          if (control.markAsTouched) {
+            control.markAsTouched();
+          }
         });
       }
     } catch (error) {
@@ -290,7 +298,9 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
       });
     } else {
       Object.values(this.editTransactionForm.controls).forEach((control) => {
-        control.markAsDirty();
+        if (control.value === '' && control.markAsTouched) {
+          control.markAsTouched();
+        }
       });
     }
   }
@@ -313,6 +323,7 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   resetForm() {
     this.auditTransactionService.resetForm().then(() => {
       this.fetchTransaction = false;
+      this.coabyId?.unsubscribe();
     });
   }
 
@@ -365,7 +376,6 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
       // If it's a string, assume it's already in the correct format
       formattedDate = date;
     } else {
-      console.error('Invalid date format:', date);
       return;
     }
     this.editTransactionForm.get('postedDate')?.setValue(formattedDate);
@@ -373,12 +383,33 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
 
   // FOR ADD
   private formatAddDate(date: Date | string): void {
-    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
+    let formattedDate: string;
+
+    if (date instanceof Date) {
+      // If it's a Date object, format it using DatePipe
+      formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy') || '';
+    } else if (typeof date === 'string') {
+      // If it's a string, assume it's already in the correct format
+      formattedDate = date;
+    } else {
+      return;
+    }
+
     this.addTransactionForm.get('date')?.setValue(formattedDate);
   }
 
   private formatAddPostedDate(date: Date | string): void {
-    const formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy');
+    let formattedDate: string;
+
+    if (date instanceof Date) {
+      // If it's a Date object, format it using DatePipe
+      formattedDate = this.datePipe.transform(date, 'dd/MM/yyyy') || '';
+    } else if (typeof date === 'string') {
+      // If it's a string, assume it's already in the correct format
+      formattedDate = date;
+    } else {
+      return;
+    }
     this.addTransactionForm.get('postedDate')?.setValue(formattedDate);
   }
 
@@ -420,16 +451,9 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     );
   }
 
-  private formatAddAmount(amount: number): void {
-    const formattedAmount = parseFloat(
-      this.addTransactionForm.get('amount')?.value
-    );
-    this.addTransactionForm.get('amount')?.setValue(formattedAmount);
-  }
-
   // Toggle Edit Transaction Dropdown
   openEditDialog(transaction: FetchTransaction) {
-    this.getCoaId(transaction.coa).subscribe((id) => {
+    this.coabyId = this.getCoaId(transaction.coa).subscribe((id) => {
       this.editTransactionForm.get('coa')?.patchValue(id);
     });
     this.editTransactionForm.patchValue({
@@ -515,11 +539,11 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   }
 
   private handleFormChanges(form: FormGroup): void {
-    const transactionType = form.get('transactionType')?.value;
-    const isEmployee = form.get('isEmployee')?.value;
+    const transactionType = form.get('transactionType')!.value;
+    const isEmployee = form.get('isEmployee')!.value;
     let customerType: number;
 
-    if (transactionType === 1) {
+    if (transactionType === 1 && isEmployee !== null) {
       customerType = isEmployee ? 3 : 1;
       this.getCustomers(customerType);
     } else if (transactionType === 0) {
@@ -530,21 +554,30 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
 
   // Subscribe to value changes in forms and call the appropriate handler
   private subscribeToFormChanges(form: FormGroup, editMode = false): void {
-    const handler = editMode
-      ? this.handleFormChanges.bind(this)
-      : this.handleFormChanges.bind(this);
+    const handler = this.handleFormChanges.bind(this);
 
-    form.get('transactionType')?.valueChanges.subscribe(() => {
-      if (form.get('transactionType')?.value === 0) {
-        form.get('isEmployee')?.patchValue(false);
-      }
-      handler(form);
-    });
+    form
+      .get('transactionType')
+      ?.valueChanges.pipe(
+        debounceTime(300) // Adjust the debounce time as needed
+      )
+      .subscribe(() => {
+        if (form.get('transactionType')?.value === 0) {
+          form.get('isEmployee')?.patchValue(false);
+        }
+        handler(form);
+      });
 
-    form.get('isEmployee')?.valueChanges.subscribe(() => {
-      handler(form);
-    });
+    form
+      .get('isEmployee')
+      ?.valueChanges.pipe(
+        debounceTime(300) // Adjust the debounce time as needed
+      )
+      .subscribe(() => {
+        handler(form);
+      });
   }
+
   // Paginator Page Index
   calculateStartIndex() {
     return (this.pageNumber - 1) * this.pageSize + 1;
@@ -563,7 +596,20 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   }
 
   allowOnlyNumbers(event: KeyboardEvent, input: HTMLInputElement) {
-    const allowedChars = /[0-9.-]/;
+    const allowedChars = /[0-9.]/;
+
+    // Allow deletion with Backspace or Delete keys
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      return; // Allow deletion
+    }
+
+    if (!allowedChars.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  allowOnlyNumbersCheque(event: KeyboardEvent, input: HTMLInputElement) {
+    const allowedChars = /[0-9]/;
 
     // Allow deletion with Backspace or Delete keys
     if (event.key === 'Backspace' || event.key === 'Delete') {
