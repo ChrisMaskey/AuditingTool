@@ -95,13 +95,13 @@ export class AuditTransactionService implements AuditTransactionFacade {
       statementId: ['', this.requiredValidator],
       date: ['', this.requiredValidator],
       transactionType: ['', this.requiredValidator],
-      customerId: ['', this.requiredValidator],
-      isEmployee: ['', this.requiredValidator],
+      customerId: [null, this.requiredValidator],
+      isEmployee: [null, this.requiredValidator],
       coa: ['', this.requiredValidator],
       isCheque: ['', this.requiredValidator],
-      chequeNumber: ['', [this.requiredValidator, chequeNumberValidator]],
-      postedDate: ['', this.requiredValidator],
-      amount: ['', [this.requiredValidator]],
+      chequeNumber: [null, [this.requiredValidator, chequeNumberValidator]],
+      postedDate: [null, this.requiredValidator],
+      amount: [null, this.requiredValidator],
     });
 
     // Add conditional validators for chequeNumber, postedDate, and amount
@@ -135,8 +135,8 @@ export class AuditTransactionService implements AuditTransactionFacade {
       transactionId: ['', this.requiredValidator],
       date: ['', this.requiredValidator],
       transactionType: ['', this.requiredValidator],
-      customerId: ['', this.requiredValidator],
-      isEmployee: ['', this.requiredValidator],
+      customerId: [null, this.requiredValidator],
+      isEmployee: [null, this.requiredValidator],
       coa: ['', this.requiredValidator],
       isCheque: ['', this.requiredValidator],
       chequeNumber: ['', [this.requiredValidator, chequeNumberValidator]],
@@ -182,7 +182,9 @@ export class AuditTransactionService implements AuditTransactionFacade {
       this.addTransactionForm
         .get('statementId')
         ?.setValue(this.getStatementId());
-      this.addTransactionForm.get('isEmployee')?.setValue('');
+      this.addTransactionForm.get('isEmployee')?.setValue(null);
+      this.addTransactionForm.get('amount')?.setValue(null);
+      this.addTransactionForm.get('customerId')?.setValue(null);
       resolve();
     });
   }
