@@ -96,7 +96,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
       date: ['', this.requiredValidator],
       transactionType: ['', this.requiredValidator],
       customerId: ['', this.requiredValidator],
-      isEmployee: [false, this.requiredValidator],
+      isEmployee: ['', this.requiredValidator],
       coa: ['', this.requiredValidator],
       isCheque: ['', this.requiredValidator],
       chequeNumber: ['', [this.requiredValidator, chequeNumberValidator]],
@@ -182,7 +182,7 @@ export class AuditTransactionService implements AuditTransactionFacade {
       this.addTransactionForm
         .get('statementId')
         ?.setValue(this.getStatementId());
-      this.addTransactionForm.get('isEmployee')?.setValue(false);
+      this.addTransactionForm.get('isEmployee')?.setValue('');
       resolve();
     });
   }

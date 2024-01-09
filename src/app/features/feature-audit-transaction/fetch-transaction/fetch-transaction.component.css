@@ -3,13 +3,13 @@
 }
 
 /* DROPDOWN */
-:host ::ng-deep .p-component {
+/* :host ::ng-deep .p-component {
   font-family: "Inter" !important;
-}
+} */
 
-:host ::ng-deep p-dropdownitem.p-element.ng-start-inserted {
+/* :host ::ng-deep p-dropdownitem.p-element.ng-start-inserted {
   @apply text-[0.75rem] !important;
-}
+} */
 
 :host ::ng-deep .p-dropdown {
   width: 100%;
@@ -59,7 +59,7 @@
   color: #6c757d;
 }
 
-:host ::ng-deep .p-ripple.p-element.p-dropdown-item {
+/* :host ::ng-deep .p-ripple.p-element.p-dropdown-item {
   font-family: "Inter" !important;
   font-size: 0.75rem !important;
   font-weight: 400;
@@ -68,7 +68,7 @@
   font-family: "Inter" !important;
   font-size: 0.75rem !important;
   font-weight: 400;
-}
+} */
 
 /* Table Css */
 :host ::ng-deep .p-datatable.p-datatable .p-datatable-thead > tr > th {

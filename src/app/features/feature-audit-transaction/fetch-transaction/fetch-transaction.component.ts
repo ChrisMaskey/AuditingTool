@@ -73,7 +73,6 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
   pageSize: number = 8;
   pageNumber: number = 1;
   totalCount: number = 0;
-  customer: boolean = false;
   maxDate!: Date;
   minDate!: Date;
   defaultDate!: Date;
@@ -145,21 +144,20 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.addTransactionForm
       .get('transactionType')
       ?.valueChanges.subscribe(() => {
-        this.handleFormChanges();
+        if (this.addTransactionForm.get('transactionType')?.value === 0) {
+          this.addTransactionForm.get('isEmployee')?.patchValue(false);
+        }
       });
-
-    this.addTransactionForm.get('isEmployee')?.valueChanges.subscribe(() => {
-      this.handleFormChanges();
-    });
     this.editTransactionForm
       .get('transactionType')
       ?.valueChanges.subscribe(() => {
-        this.handleEditFormChanges();
+        if (this.editTransactionForm.get('transactionType')?.value === 0) {
+          this.editTransactionForm.get('isEmployee')?.patchValue(false);
+        }
       });
 
-    this.editTransactionForm.get('isEmployee')?.valueChanges.subscribe(() => {
-      this.handleEditFormChanges();
-    });
+    this.subscribeToFormChanges(this.addTransactionForm);
+    this.subscribeToFormChanges(this.editTransactionForm, true);
 
     this.transactionFilterForm
       .get('date')
@@ -237,20 +235,20 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     this.formatAddPostedDate(this.addTransactionForm.get('postedDate')?.value);
     this.formatAddAmount(this.addTransactionForm.get('amount')?.value);
     try {
-      // if (this.addTransactionForm.valid) {
-      await this.auditTransactionService.addTransaction().then(() => {
-        this.closeAddDialog();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Transaction Added',
+      if (this.addTransactionForm.valid) {
+        await this.auditTransactionService.addTransaction().then(() => {
+          this.closeAddDialog();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Transaction Added',
+          });
         });
-      });
-      // } else {
-      // Object.values(this.addTransactionForm.controls).forEach((control) => {
-      //   control.markAsDirty();
-      // });
-      // }
+      } else {
+        Object.values(this.addTransactionForm.controls).forEach((control) => {
+          control.markAsDirty();
+        });
+      }
     } catch (error) {
       console.log(error);
       this.messageService.add({
@@ -516,39 +514,35 @@ export class FetchTransactionComponent implements OnInit, OnDestroy {
     });
   }
 
-  handleFormChanges(): void {
-    const transactionType =
-      this.addTransactionForm.get('transactionType')?.value;
-    const isEmployee = this.addTransactionForm.get('isEmployee')?.value;
-
+  private handleFormChanges(form: FormGroup): void {
+    const transactionType = form.get('transactionType')?.value;
+    const isEmployee = form.get('isEmployee')?.value;
     let customerType: number;
 
     if (transactionType === 1) {
       customerType = isEmployee ? 3 : 1;
-    } else {
-      customerType = 2;
-    }
-
-    this.getCustomers(customerType);
-  }
-
-  async handleEditFormChanges() {
-    const transactionType =
-      this.editTransactionForm.get('transactionType')?.value;
-    const isEmployee = this.editTransactionForm.get('isEmployee')?.value;
-
-    let customerType: number;
-
-    if (transactionType === 1) {
-      customerType = isEmployee ? 3 : 1;
+      this.getCustomers(customerType);
     } else if (transactionType === 0) {
       customerType = 2;
-    } else {
-      customerType = 0;
+      this.getCustomers(customerType);
     }
+  }
 
-    await this.getCustomers(customerType).then((response) => {
-      this.customer = true;
+  // Subscribe to value changes in forms and call the appropriate handler
+  private subscribeToFormChanges(form: FormGroup, editMode = false): void {
+    const handler = editMode
+      ? this.handleFormChanges.bind(this)
+      : this.handleFormChanges.bind(this);
+
+    form.get('transactionType')?.valueChanges.subscribe(() => {
+      if (form.get('transactionType')?.value === 0) {
+        form.get('isEmployee')?.patchValue(false);
+      }
+      handler(form);
+    });
+
+    form.get('isEmployee')?.valueChanges.subscribe(() => {
+      handler(form);
     });
   }
   // Paginator Page Index
